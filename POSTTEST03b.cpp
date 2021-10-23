@@ -15,7 +15,6 @@ int kembali();
 void menu_harga();
 void daftar_pengguna();
 
-// Array Struct dengan 6 atribut
 struct Pelanggan {
 	string nama, area, idPs;
 	int id, jenis, jam;
