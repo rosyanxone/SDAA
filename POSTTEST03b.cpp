@@ -7,10 +7,7 @@
 #include <fstream>
 using namespace std;
 
-int i, w, x = 0;
-int y = 3;
-int z = 6;
-
+int i = 0;
 int kembali();
 void menu_harga();
 void daftar_pengguna();
@@ -59,7 +56,7 @@ void menu() {
 	
 	switch (masuk) {
 		case '0':
-			cout << "\n-- Terimakasih telah menggunakan..." << endl;
+			cout << " -- Program selesai..." << endl;
 			break;
 		case '1':
 			menu_rental(perental);
@@ -86,7 +83,6 @@ void menu_rental(Pelanggan *perental) {
 	system("cls");
 	i++;
 	for (int k = 0; k < i; k++) {
-		cout << "K = " << k << endl;
 		perental++;
 	} int jenisPs[10];
 	
@@ -126,8 +122,8 @@ void menu_rental(Pelanggan *perental) {
 		
 		if (get == -1 || ps[iPs][4] != "Tersedia") {
 			cout << "+------------------------------------+\n"; 
-			cout << "\nJenis Ps-" << perental->jenis << " tidak tersedia\n";
-			cout << "atau sedang full digunakan\n";
+			cout << "\nJenis Ps-" << perental->jenis << " tidak tersedia, atau\n";
+			cout << "sedang full digunakan\n";
 			i--;
 			kembali();
 		} else {
@@ -159,7 +155,6 @@ void menu_rental(Pelanggan *perental) {
 				// Membuat file .txt sebagai struk pengguna
 				string file = "D:\\Struk Rental Ps Id-"+to_string(i)+".txt";
 				string baris;
-				
 				ofstream output(file);
 				ofstream outfile;
 				outfile.open(file.c_str());
@@ -188,8 +183,7 @@ void menu_rental(Pelanggan *perental) {
 				infile.open(file.c_str());
 				while (getline (infile,baris)) {
 					cout << baris << '\n';
-					}
-				infile.close();
+				} infile.close();
 
 				cout << "Struk anda disimpan dalam bentuk file .txt" << endl;
 				cout << "dengan lokasi '"+file << "'\n" << endl;
@@ -213,7 +207,6 @@ void ganti_array(int &data) {
 
 void menu_harga(){
 	system("cls");
-	
 	char opsi;
 	int data;
 	
@@ -222,7 +215,7 @@ void menu_harga(){
 	cout << "| Id  | JENIS | RUANG   | HARGA PER JAM | STATUS\t|\n";
 	cout << "+-----|-------|---------|---------------|---------------+";
 	int a = 0;
-	while(a<9) {
+	while(a < 9) {
 		if (ps[a][1] == "" && ps[a][2] == "" && ps[a][3] == "" && ps[a][4] == "") {
 			cout << "\n|  " << ps[a][0] << "  |       |         |               |               |";
 		} else {
@@ -262,7 +255,6 @@ void menu_harga(){
 }
 
 void ganti_struct(Pelanggan *perental, int &usr) {
-	cout << usr << endl;
 	string nomor;
 	for (int j = 0; j < i; j++) {
 		perental++;
@@ -298,7 +290,7 @@ string menu_sorting(char menuSort) {
 	order = (order=="1") ? "Ascending" : "Descending"; 
 	int n = i+1;
 	
-	for (int j = 0; j < i+1; j++) {
+	for (int j = 0; j < n; j++) {
 		// Menggunakan semua kategori Array
 		// Struct untuk di sorting
 		switch (menuSort) {
@@ -322,7 +314,8 @@ string menu_sorting(char menuSort) {
 				system("pause");
 				menu();
 				break;
-	}	}
+		}	
+	}
 
 	if (metodeSort == '0') {
 		menu();
