@@ -176,7 +176,8 @@ void menu_rental(Pelanggan *perental) {
 					outfile << " ==============================" << endl;
 					outfile << baris << endl;
 					break;
-				} outfile.close();
+				} 
+				outfile.close();
 				ifstream infile;
 
 				// Menampilkan isi struk / isi file .txt
