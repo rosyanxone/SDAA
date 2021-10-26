@@ -119,7 +119,6 @@ void menu_rental(Pelanggan *perental) {
 				get = -1;
 			}
 		}
-		
 		if (get == -1 || ps[iPs][4] != "Tersedia") {
 			cout << "+------------------------------------+\n"; 
 			cout << "\nJenis Ps-" << perental->jenis << " tidak tersedia, atau\n";
@@ -393,6 +392,7 @@ void daftar_pengguna() {
 						perental[h].id = 0;
 						perental[h].jam = 0;
 						perental[h].jenis = 0;
+						break;
 					}
 				}
 				cout << "\nData berhasil dihapus!" << endl;
