@@ -864,7 +864,6 @@ int jumpSearch(Pelanggan *arr, int x, string y, int n, char menuSearch) {
 		if (arr[prev].var1 == y) {
 			return prev;
 		}
-		return -1;
 	} else if (menuSearch == '1' || menuSearch == '3' || menuSearch == '5') {
 		while (arr[min(step, n)-1].var2 < x) {
 			prev = step;
@@ -882,8 +881,8 @@ int jumpSearch(Pelanggan *arr, int x, string y, int n, char menuSearch) {
 		if (arr[prev].var2 == x) {
 			return prev;
 		}
-		return -1;
 	}
+	return -1;
 }
 
 int main() {
