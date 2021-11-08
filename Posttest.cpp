@@ -8,28 +8,33 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-// variabel i sebagai variabel struct global
-int i = 0;
+int totalId = 0;
 int kembali();
 void menu_harga();
-void daftar_pengguna();
+int main();
 
 struct Pelanggan {
 	string nama, area, idPs;
 	int id, jenis, jam;
 	string var1;
 	int var2;
-}; 
-Pelanggan perental[100];
-void menu_rental(Pelanggan *perental);
+};
 
-int shell_sort(Pelanggan *perental, int &n, string order, char menuSort);
-void quick_sort(Pelanggan *perental, int low, int high, string order, char menuSort);
-void merge_sort(Pelanggan *perental, int l, int r, string order, char menuSort);
+struct Node {
+	int data;
+	struct Node *next;
+    Pelanggan perental[100];
+}; struct Node* head = NULL;
 
-// Menggunakan 2 metode search yang ada di modul
-int jumpSearch(Pelanggan *arr, int x, string y, int n, char menuSearch);
-int fibMonaccianSearch(Pelanggan *arr, int x, string y, int n, char menuSearch);
+void menu_rental(Node **head);
+void daftar_pengguna(struct Node* nodeUser);
+
+int shell_sort(string arr1[], int arr2[], int &n, string order, char menuSort);
+void quick_sort(string arr1[], int arr2[], int low, int high, string order, char menuSort);
+void merge_sort(string arr1[], int arr2[], int l, int r, string order, char menuSort);
+
+int jumpSearch(string arr1[], int arr2[], int x, string y, int n, char menuSearch);
+int fibMonaccianSearch(string arr1[], int arr2[], int x, string y, int n, char menuSearch);
 
 string ps[10][5] = {
 	{"1", "Ps 2", "Area 1", "Rp.8000", "Tersedia"},
@@ -46,10 +51,9 @@ string ps[10][5] = {
 };
 
 void menu() {
-	system("cls");
 	char masuk;
-	
-	cout << "=====PROGRAM RENTAL PS=====" << endl;
+	system("cls");
+	cout << "===== PIXEL RENTAL PS =====" << endl;
 	cout << "+-------------------------+" << endl;
 	cout << "| [1] Rental Now          |" << endl;
 	cout << "| [2] Daftar Harga        |" << endl;
@@ -65,13 +69,13 @@ void menu() {
 			exit(0);
 			break;
 		case '1':
-			menu_rental(perental);
+			menu_rental(&head);
 			break;
 		case '2':
 			menu_harga();
 			break;
 		case '3':
-			daftar_pengguna();
+			daftar_pengguna(head);
 			break;
 		default:			
 			cout << "\nPilihan anda tidak valid!\n";
@@ -86,20 +90,22 @@ int kembali() {
 	return 0;
 }
 
-void menu_rental(Pelanggan *perental) {
+void menu_rental(Node **head) {
 	system("cls");
-	i++;
-	for (int k = 0; k < i; k++) {
-		perental++;
-	} int jenisPs[10];
+    int jenisPs[10];
+    Node *nodeBaru = new Node();
+
+    nodeBaru->data = totalId;
+	nodeBaru->perental->id = totalId;
+	totalId++;
 	
 	cout << "+------------------------------------+\n";
 	cout << "| Masukkan nama anda   : ";
-	cin.ignore(); getline(cin, perental->nama);
-	if (perental->nama.size() > 13) {
+	cin.ignore(); getline(cin, nodeBaru->perental->nama);
+	if (nodeBaru->perental->nama.size() > 13) {
 		cout << "+------------------------------------+" << endl;
 		cout << "\nTidak dapat menerima nama lebih dari 13 huruf" << endl;
-		i--;
+		totalId--;
 		kembali();
 	} else {
 		for (int j = 0; j < 10; j++) {
@@ -112,11 +118,11 @@ void menu_rental(Pelanggan *perental) {
 		}
 		
 		cout << "| Masukkan jenis Ps    : ";
-		cin >> perental->jenis;
+		cin >> nodeBaru->perental->jenis;
 
 		int get, iPs;
 		for (int j = 0; j < 10; j++) {
-			if (jenisPs[j] == perental->jenis) {
+			if (jenisPs[j] == nodeBaru->perental->jenis) {
 				get = jenisPs[j];
 				iPs = j;
 				break;
@@ -127,18 +133,18 @@ void menu_rental(Pelanggan *perental) {
 		
 		if (get == -1 || ps[iPs][4] != "Tersedia") {
 			cout << "+------------------------------------+\n"; 
-			cout << "\nJenis Ps-" << perental->jenis << " tidak tersedia, atau\n";
+			cout << "\nJenis Ps-" << nodeBaru->perental->jenis << " tidak tersedia, atau\n";
 			cout << "sedang full digunakan\n";
-			i--;
+			totalId--;
 			kembali();
 		} else {
 			cout << "| Masukkan jam sewa    : ";
-			cin >> perental->jam;
+			cin >> nodeBaru->perental->jam;
 			
-			if (perental->jam == 0) {
+			if (nodeBaru->perental->jam == 0) {
 				cout << "+------------------------------------+" << endl;
 				cout << "\nJam tidak dapat berisi kosong" << endl;
-				i--;
+				totalId--;
 				kembali();
 			} else {
 
@@ -148,50 +154,62 @@ void menu_rental(Pelanggan *perental) {
 					price[j] = '0';
 				} harga = stoi(price); // jika stoi error pastikan untuk mengupdate compiler ke C++11
 
-				perental->area = ps[iPs][2];
-				perental->idPs = ps[iPs][0];
-				perental->id = i;
-				ps[iPs][4] = "Disewa Id-"+to_string(i);
+				nodeBaru->perental->area = ps[iPs][2];
+				nodeBaru->perental->idPs = ps[iPs][0];
+				nodeBaru->perental->id = totalId;
+				ps[iPs][4] = "Disewa Id-"+to_string(totalId);
 				
-				cout << "|-Ps " << perental->jenis << " = Rp."<< harga << "/jam \n";
+				cout << "|-Ps " << nodeBaru->perental->jenis << " = Rp."<< harga << "/jam \n";
 				cout << "+------------------------------------+"<<endl;
 				cout << "Struk:" << endl;
 
 				// Membuat file .txt sebagai struk pengguna
-				string file = "D:\\Struk Rental Ps Id-"+to_string(i)+".txt";
+				string file = "Struk Rental Ps Id-"+to_string(totalId)+".txt";
 				string baris;
-				ofstream output(file);
+				ofstream output(file, fstream::app);
 				ofstream outfile;
 				outfile.open(file.c_str());
 
 				while(true){
-					outfile << "  ============================ " << endl;
-					outfile << "             RENTAL PS         " << endl;
-					outfile << "          SEMPAJA SELATAN      " << endl;
+				    outfile << " +-----------------------------+" << endl;
+					outfile << " |        PIXEL Rental PS      |" << endl;
+					outfile << " |           SAMARINDA         |" << endl;
+					outfile << " +-----------------------------+" << endl;
+					outfile << " |           id : " << nodeBaru->perental->id << endl;
+					outfile << " |         nama : " << nodeBaru->perental->nama << endl;
+					outfile << " |        jenis : Ps " << nodeBaru->perental->jenis << endl;
+					outfile << " |       durasi : " << nodeBaru->perental->jam << " jam" << endl;
+					outfile << " |      ruangan : " << nodeBaru->perental->area << endl;
+					outfile << " +----------------------------+" << endl;
+					outfile << " | Tagihan anda : Rp." << nodeBaru->perental->jam * harga << endl;
+					outfile << " +----------------------------+" << endl;
 					outfile << " ==============================" << endl;
-					outfile << " | Id pengguna  : " << perental->id << endl;
-					outfile << " | Atas nama    : " << perental->nama << endl;
-					outfile << " | Jenis        : Ps " << perental->jenis << endl;
-					outfile << " | Anda menyewa : " << perental->jam << " jam" << endl;
-					outfile << " +=============================" << endl;
-					outfile << " | Ruang anda   : " << perental->area << endl;
-					outfile << " | Tagihan anda : Rp." << perental->jam * harga << endl;
-					outfile << " ==============================" << endl;
-					outfile << "           TERIMA KASIH        " << endl;
+					outfile << "          TERIMA KASIH         " << endl;
 					outfile << " ==============================" << endl;
 					outfile << baris << endl;
 					break;
 				} outfile.close();
 				ifstream infile;
-
-				// Menampilkan isi struk / isi file .txt
+				
+				// File eksternal berupa txt
+				// Menampilkan isi struk / isi dari file .txt
 				infile.open(file.c_str());
 				while (getline (infile,baris)) {
 					cout << baris << '\n';
 				} infile.close();
 
 				cout << "Struk anda disimpan dalam bentuk file .txt" << endl;
-				cout << "dengan lokasi '"+file << "'\n" << endl;
+    
+				nodeBaru->next = NULL;
+				if (*head == NULL) {
+					*head = nodeBaru;
+					kembali();
+				}
+				Node *temp = *head;
+				while (temp->next != NULL) {
+					temp = temp->next;
+				}
+				temp->next = nodeBaru;
 				kembali();
 }}}}
 
@@ -259,154 +277,223 @@ void menu_harga(){
 	}
 }
 
-string menu_sorting(char menuSort) {
-	char metodeSort;
-	string order;
+string menu_sorting(string arr1[], int arr2[], Node *head, char menuSort, char metodeSort, string order) {
+	Node *temp = head;
+	string arrTemp[totalId][6] = {};
 
-	cout << "[1] Shell Sort" << endl;
-	cout << "[2] Quick Sort" << endl;
-	cout << "[3] Merge Sort" << endl;
-	cout << "[0] Kembali" << endl;
-	cout << "-- Pilih metode sorting : ";
-	cin >> metodeSort;
-	cout << "[1] Ascending" << endl;
-	cout << "[2] Descending" << endl;
-	cout << "-- Sorting Secara(1/2)  : ";
-	cin >> order;
 	order = (order=="1") ? "Ascending" : "Descending"; 
-	int n = i+1;
-	
-	for (int j = 0; j < n; j++) {
-		switch (menuSort) {
-			case '0':
-				menu();
-				break;
+	int n = totalId+1;
+	for (int i = 0; i < totalId; i++) {
+		switch(menuSort) {
 			case '1':
-				perental[j].var2 = perental[j].id;
+				arr2[i] = temp->perental->id;
 				break;
 			case '2':
-				perental[j].var1 = perental[j].nama;
+				arr1[i] = temp->perental->nama;
 				break;
 			case '3':
-				perental[j].var2 = perental[j].jenis;
+				arr2[i] = temp->perental->jenis;
 				break;
 			case '4':
-				perental[j].var1 = perental[j].area;
+				arr1[i] = temp->perental->area;
 				break;
 			case '5':
-				perental[j].var2 = perental[j].jam;
+				arr2[i] = temp->perental->jam;
 				break;
-			default:
-				cout << "\nAnda memasukkan pilihan yang salah!" << endl;
-				system("pause");
-				menu();
-				break;
-		}	
+		}
+		temp = temp->next;
 	}
-
-	if (metodeSort == '0') {
-		menu();
-	} else if (metodeSort == '1') {
-		shell_sort(perental, n, order, menuSort);
+	if (metodeSort == '1') {
+		shell_sort(arr1, arr2, totalId, order, menuSort);
 	} else if (metodeSort == '2') {
-		quick_sort(perental, 0, n-1, order, menuSort);
+		 quick_sort(arr1, arr2, 0, totalId-1, order, menuSort);
 	} else if (metodeSort == '3') {
-		merge_sort(perental, 0, n-1, order, menuSort);
+		 merge_sort(arr1, arr2, 0, totalId-1, order, menuSort);
 	}
 	
+	Node *temp2 = head;
+	int x = 0;
+	while(x < totalId) {
+		arrTemp[x][0] = to_string(temp2->perental->id);
+		arrTemp[x][1] = temp2->perental->nama;
+		arrTemp[x][2] = to_string(temp2->perental->jenis);
+		arrTemp[x][3] = temp2->perental->area;
+		arrTemp[x][4] = to_string(temp2->perental->jam);
+		arrTemp[x][5] = temp2->perental->idPs;
+		temp2 = temp2->next;
+		x++;
+	}
+	
+	int y = 0;
+	while(y < totalId) {
+		int z = 0;
+		while(z < totalId) {
+			switch(menuSort) {
+				case '1':
+					if(arr2[y] == stoi(arrTemp[z][0])) {
+						head->perental->id = stoi(arrTemp[z][0]);
+						head->perental->nama = arrTemp[z][1];
+						head->perental->jenis = stoi(arrTemp[z][2]);
+						head->perental->area = arrTemp[z][3];
+						head->perental->jam = stoi(arrTemp[z][4]);
+						head->perental->idPs = arrTemp[z][5];
+						head = head->next;
+						y++;
+						if (head == NULL) {
+							return order;
+							break;
+						}
+					}
+					break;
+				case '2':
+					if(arr1[y] == arrTemp[z][1]) {
+						head->perental->id = stoi(arrTemp[z][0]);
+						head->perental->nama = arrTemp[z][1];
+						head->perental->jenis = stoi(arrTemp[z][2]);
+						head->perental->area = arrTemp[z][3];
+						head->perental->jam = stoi(arrTemp[z][4]);
+						head->perental->idPs = arrTemp[z][5];
+						head = head->next;
+						y++;
+						if (head == NULL) {
+							return order;
+							break;
+						}
+					}
+					break;
+				case '3':
+					if(arr2[y] == stoi(arrTemp[z][2])) {
+						head->perental->id = stoi(arrTemp[z][0]);
+						head->perental->nama = arrTemp[z][1];
+						head->perental->jenis = stoi(arrTemp[z][2]);
+						head->perental->area = arrTemp[z][3];
+						head->perental->jam = stoi(arrTemp[z][4]);
+						head->perental->idPs = arrTemp[z][5];
+						head = head->next;
+						y++;
+						if (head == NULL) {
+							return order;
+							break;
+						}
+					}
+					break;
+				case '4':
+					if(arr1[y] == arrTemp[z][3]) {
+						head->perental->id = stoi(arrTemp[z][0]);
+						head->perental->nama = arrTemp[z][1];
+						head->perental->jenis = stoi(arrTemp[z][2]);
+						head->perental->area = arrTemp[z][3];
+						head->perental->jam = stoi(arrTemp[z][4]);
+						head->perental->idPs = arrTemp[z][5];
+						head = head->next;
+						y++;
+						if (head == NULL) {
+							return order;
+							break;
+						}
+					}
+					break;
+				case '5':
+					if(arr2[y] == stoi(arrTemp[z][4])) {
+						head->perental->id = stoi(arrTemp[z][0]);
+						head->perental->nama = arrTemp[z][1];
+						head->perental->jenis = stoi(arrTemp[z][2]);
+						head->perental->area = arrTemp[z][3];
+						head->perental->jam = stoi(arrTemp[z][4]);
+						head->perental->idPs = arrTemp[z][5];
+						head = head->next;
+						y++;
+						if (head == NULL) {
+							return order;
+							break;
+						}
+					}
+					break;
+			}
+			z++;
+		}
+	}
 	return order;
 }
 
-void menu_searching(char menuSearch, char metodeSearch) {
-	int n = i+1;
+void menu_searching(string arr1[], int arr2[], Node *head, char menuSearch, char metodeSearch) {
+	Node *temp = head;
 	string y, nomor;
 	int x;
+	string tempArr[totalId][6] = {};
 
 	switch (menuSearch) {
 		// Pilihan kategori yang ingin di Search
 		case '1':
-			cout << "-- Masukkan id yang ingin \n-- anda cari : ";
+			cout << "-- Masukkan id yang ingin \n - anda cari : ";
 			cin >> x;
-			for (int h = 0; h < n; h++) {
-				perental[h].var2 = perental[h].id;
-			}
-			shell_sort(perental, n, "Ascending", menuSearch);
 			break;
 		case '2':
-			cout << "-- Masukkan nama yang \n-- ingin anda cari : ";
+			cout << "-- Masukkan nama yang \n - ingin anda cari : ";
 			cin.ignore(); getline(cin, y);
-			for (int h = 0; h < n; h++) {
-				perental[h].var1 = perental[h].nama;
-			}
-			shell_sort(perental, n, "Ascending", menuSearch);
 			break;
 		case '3':
-			cout << "-- Masukkan jenis Ps yang \n-- ingin anda cari : Ps ";
+			cout << "-- Masukkan jenis Ps yang \n - ingin anda cari : Ps ";
 			cin >> x;
-			for (int h = 0; h < n; h++) {
-				perental[h].var2 = perental[h].jenis;
-			}
-			shell_sort(perental, n, "Ascending", menuSearch);
 			break;
 		case '4':
-			cout << "-- Masukkan ruang yang ingin \n-- anda cari : Area ";
+			cout << "-- Masukkan ruang yang ingin \n - anda cari : Area ";
 			cin >> nomor; y = "Area "+nomor;
-			for (int h = 0; h < n; h++) {
-				perental[h].var1 = perental[h].area;
-			}
-			shell_sort(perental, n, "Ascending", menuSearch);
 			break;
 		case '5':
-			cout << "-- Masukkan jam yang \n-- ingin anda cari : ";
+			cout << "-- Masukkan jam yang \n - ingin anda cari : ";
 			cin >> x;
-			for (int h = 0; h < n; h++) {
-				perental[h].var2 = perental[h].jam;
-			}
-			shell_sort(perental, n, "Ascending", menuSearch);
 			break;
+	} 
+	
+	int k = 0;
+	while(k < totalId) {
+		tempArr[k][0] = to_string(temp->perental->id);
+		tempArr[k][1] = temp->perental->nama;
+		tempArr[k][2] = to_string(temp->perental->jenis);
+		tempArr[k][3] = temp->perental->area;
+		tempArr[k][4] = to_string(temp->perental->jam);
+		tempArr[k][5] = temp->perental->idPs;
+		temp = temp->next;
+		k++;
 	}
 
-	int array[n] = {};
 	int j = -1;
 	int index;
-		system("cls");
-		cout << " =======================DAFTAR PENGGUNA==================\n";
-		cout << "|========================================================|\n";
-		cout << "| ID  | NAMA \t\t| JENIS | RUANG  | SELESAI DALAM |\n";
-		cout << "+-----|-----------------|-------|--------|---------------+\n";
+	system("cls");
+	cout << " =======================DAFTAR PENGGUNA==================\n";
+	cout << "|========================================================|\n";
+	cout << "| ID  | NAMA \t\t| JENIS | RUANG  | SELESAI DALAM |\n";
+	cout << "+-----|-----------------|-------|--------|---------------+\n";
 	if (menuSearch == '2' || menuSearch == '4') {
-		for (int i = 0; i < n; i++) {
-			if (metodeSearch == '1') {
-				index = jumpSearch(perental, x, y, n, menuSearch);
-			} else if (metodeSearch == '2') {
-				index = fibMonaccianSearch(perental, x, y, n, menuSearch);
+		if (metodeSearch == '1') {
+			index = fibMonaccianSearch(arr1, arr2, x, y, totalId-1, menuSearch);
+		} else if (metodeSearch == '2') {
+			index = jumpSearch(arr1, arr2, x, y, totalId, menuSearch);
+		}
+		if (index != -1) {
+			arr1[index] = "";
+			if (tempArr[index][1].size() < 7 && stoi(tempArr[index][0]) > 0) {
+				cout << "|  " << tempArr[index][0] << "  | " << tempArr[index][1] << " \t\t| Ps "<< tempArr[index][2] << "  | " << tempArr[index][3] << " | " << tempArr[index][4] <<" jam \t |\n";
+			} else if (tempArr[index][1].size() < 13 && stoi(tempArr[index][0]) > 0) {
+				cout << "|  " << tempArr[index][0] << "  | " << tempArr[index][1] << " \t| Ps "<< tempArr[index][2] << "  | " << tempArr[index][3] << " | " << tempArr[index][4] <<" jam \t |\n";
 			}
-			if (index != -1) {
-				if (perental[index].nama.size() < 7 && perental[index].id > 0) {
-					cout << "|  " << perental[index].id <<"  | "<<perental[index].nama<<" \t\t| Ps "<<perental[index].jenis<<"  | " << perental[index].area << " | " << perental[index].jam <<" jam \t |\n";
-				} else if (perental[index].nama.size() < 13 && perental[index].id > 0) {
-					cout << "|  " << perental[index].id <<"  | " << perental[index].nama<<" \t| Ps "<<perental[index].jenis<<"  | " << perental[index].area << " | " << perental[index].jam <<" jam \t |\n";
-				}
-				perental[index].var1 = "";
-				array[i] = index;
-				j++;
-			}
+			j++;
 		}
 	} else if (menuSearch == '1' || menuSearch == '3' || menuSearch == '5') {
-		for (int i = 0; i < n; i++) {
+		for (int i = 0; i < totalId; i++) {
 			if (metodeSearch == '1') {
-				index = jumpSearch(perental, x, y, n, menuSearch);
+				index = fibMonaccianSearch(arr1, arr2, x, y, totalId-1, menuSearch);
 			} else if (metodeSearch == '2') {
-				index = fibMonaccianSearch(perental, x, y, n, menuSearch);
+				index = jumpSearch(arr1, arr2, x, y, totalId, menuSearch);
 			}
 			if (index != -1) {
-				if (perental[index].nama.size() < 7 && perental[index].id > 0) {
-					cout << "|  " << perental[index].id <<"  | "<<perental[index].nama<<" \t\t| Ps "<<perental[index].jenis<<"  | " << perental[index].area << " | " << perental[index].jam <<" jam \t |\n";
-				} else if (perental[index].nama.size() < 13 && perental[index].id > 0) {
-					cout << "|  " << perental[index].id <<"  | " << perental[index].nama<<" \t| Ps "<<perental[index].jenis<<"  | " << perental[index].area << " | " << perental[index].jam <<" jam \t |\n";
+				arr2[index] = -1;
+				if (tempArr[index][1].size() < 7 && stoi(tempArr[index][0]) > 0) {
+					cout << "|  " << tempArr[index][0] <<"  | " << tempArr[index][1] << " \t\t| Ps " << tempArr[index][2] << "  | " << tempArr[index][3] << " | " << tempArr[index][4] <<" jam \t |\n";
+				} else if (tempArr[index][1].size() < 13 && stoi(tempArr[index][0]) > 0) {
+					cout << "|  " << tempArr[index][0] <<"  | " << tempArr[index][1] << " \t| Ps " << tempArr[index][2] << "  | " << tempArr[index][3] << " | " << tempArr[index][4] <<" jam \t |\n";
 				}
-				perental[index].var2 = -1;
-				array[i] = index;
 				j++;
 			}
 		}
@@ -420,95 +507,116 @@ void menu_searching(char menuSearch, char metodeSearch) {
 	}
 }
 
-void ganti_struct(Pelanggan *perental, int &usr) {
+void ganti_struct(Node *head, int &usr) {
 	string nomor;
-	for (int j = 0; j < i+1; j++) {
-		perental++;
-		if (perental->id == usr) {
+
+	while (head != NULL) {
+		if (head->perental->id == usr) {
 			cout << " -- Masukkan nama user: ";
-			cin.ignore(); getline(cin, perental->nama);
+			cin.ignore(); getline(cin, head->perental->nama);
 			cout << " -- Masukkan jenis ps : ";
-			cin >> perental->jenis;
+			cin >> head->perental->jenis;
 			cout << " -- Masukkan ruang ke : ";
-			cin >> nomor; perental->area = "Area "+nomor;
+			cin >> nomor; head->perental->area = "Area "+nomor;
 			cout << " -- Lama user selesai : ";
-			cin >> perental->jam;
+			cin >> head->perental->jam;
+			cout << "\nData pengguna berhasil di perbarui!" << endl;
+			kembali();
 			break;
 		}
+		head = head->next;
 	}
+	cout << "\nGagal mengedit, id tidak ditemukan\n";
+	kembali();
 }
 
-void daftar_pengguna() {
+// Dapat menghapus data dari linkedList sesuai id yang diinginkan
+void hapus_data(struct Node** headUsr, int deltId) {
+	struct Node *temp = *headUsr, *prev;
+
+	if (temp != NULL && temp->data == deltId) {
+		*headUsr = temp->next;
+		free(temp);
+		cout << "\nData berhasil dihapus!" << endl;
+		totalId--;
+		kembali();
+	}
+	while (temp != NULL && temp->data != deltId) {
+		prev = temp;
+		temp = temp->next;
+	}
+	if (temp == NULL) {
+		cout << "\nGagal menghapus, id tidak ditemukan\n";
+		kembali();
+	}
+	prev->next = temp->next;
+	free(temp);
+
+	cout << "\nData berhasil dihapus!" << endl;
+	totalId--;
+	kembali();
+}
+
+void daftar_pengguna(struct Node* nodeUser) {
 	system("cls");
-	
 	char opsi2;
 	int usr, idPs;
 	int k = 0;
+	string arr1[totalId] = {};
+	int arr2[totalId] = {};
 	
 	cout << " =======================DAFTAR PENGGUNA==================\n";
 	cout << "|========================================================|\n";
 	cout << "| ID  | NAMA \t\t| JENIS | RUANG  | SELESAI DALAM |\n";
-	if (i == 0) {
+	if (nodeUser == NULL) {
 		cout << "| --- | ---  \t\t| ---   | ---    | ---           |\n";
 		cout << "|========================================================|\n";
-		cout << "*daftar data pengguna akan tampil jika ada perental\n\n";
+		cout << "*daftar pengguna akan tampil jika ada perental\n\n";
 		kembali();
-	} else {
-		cout << "+-----|-----------------|-------|--------|---------------+\n";
-		for (int j = 0; j < i+1; j++) {
-			if (perental[j].nama == "" && perental[j].id == 0) {
-				continue;
-			} else if (perental[j].nama.size() < 7 && perental[j].id > 0) {
-				cout << "|  " << perental[j].id <<"  | "<<perental[j].nama<<" \t\t| Ps "<<perental[j].jenis<<"  | " << perental[j].area << " | " << perental[j].jam <<" jam \t |\n";
-				k++;
-			} else if (perental[j].nama.size() < 13 && perental[j].id > 0) {
-				cout << "|  " << perental[j].id <<"  | " << perental[j].nama<<" \t| Ps "<<perental[j].jenis<<"  | " << perental[j].area << " | " << perental[j].jam <<" jam \t |\n";
-				k++;
-			} 
-		} if (k > 0) {
-			cout << "|========================================================|\n";
-			cout << "[1] Edit Pengguna" << endl;
-			cout << "[2] Hapus Pengguna" << endl;
-			cout << "[3] Lakukan Sorting" << endl;
-			cout << "[4] Lakukan Searching" << endl;
-			cout << "[0] Kembali " << endl;
-			cout << "--- Masukkan menu     : ";
-			cin >> opsi2;
+
+	} cout << "+-----|-----------------|-------|--------|---------------+\n";
+	while (nodeUser != NULL) {
+		if (nodeUser->perental->nama == "" && nodeUser->perental->id == -1) {
+			continue;
+		} else if (nodeUser->perental->nama.size() < 7 && nodeUser->perental->id > 0) {
+			cout << "|  " << nodeUser->perental->id << "  | "<< nodeUser->perental->nama << " \t\t| Ps " << nodeUser->perental->jenis << "  | " << nodeUser->perental->area << " | " << nodeUser->perental->jam <<" jam \t |\n";
+			k++;
+		} else if (nodeUser->perental->nama.size() < 13 && nodeUser->perental->id > 0) {
+			cout << "|  " << nodeUser->perental->id << "  | " << nodeUser->perental->nama << " \t| Ps " << nodeUser->perental->jenis << "  | " << nodeUser->perental->area << " | " << nodeUser->perental->jam <<" jam \t |\n";
+			k++;
+		}
+		nodeUser = nodeUser->next;
+	} if (k > 0) {
+		cout << "|========================================================|\n";
+		cout << "[1] Edit Pengguna" << endl;
+		cout << "[2] Hapus Pengguna" << endl;
+		cout << "[3] Lakukan Sorting" << endl;
+		cout << "[4] Lakukan Searching" << endl;
+		cout << "[0] Kembali " << endl;
+		cout << "--- Masukkan menu     : ";
+		cin >> opsi2;
 			
 			if (opsi2 == '1') {
-				cout << "--- Masukkan user id  : ";
-				cin >> usr;
-				ganti_struct(perental, usr);
-				
-				cout << "\nData pengguna berhasil di perbarui!" << endl;
-				kembali();
+				cout << "--- Masukkan user id  : "; cin >> usr;
+				ganti_struct(head, usr);
 
 			} else if (opsi2 == '2') {
-				cout << "--- Masukkan user id  : ";
-				cin >> usr;
+				cout << "--- Masukkan user id  : "; cin >> usr;
 
-				for (int h = 0; h < i+1; h++) {
-					if (perental[h].id == usr) {
-						// Mengubah status disewa menjadi tersedia
-						// karena data user dihapus
-						stringstream ubah(perental[h].idPs);
+				Node *temp = head;
+				while (temp != NULL) {
+					if (temp->perental->id == usr) {
+						stringstream ubah(temp->perental->idPs);
 						ubah >> idPs;
 						ps[idPs-1][4] = "Tersedia";
-
-						perental[h].nama = "";
-						perental[h].area = "";
-						perental[h].idPs = "";
-						perental[h].id = 0;
-						perental[h].jam = 0;
-						perental[h].jenis = 0;
 						break;
 					}
+					temp = temp->next;
 				}
-				cout << "\nData berhasil dihapus!" << endl;
-				kembali();
-			
+				hapus_data(&head, usr-1);
 			} else if (opsi2 == '3') {
-				char menuSort;
+				char menuSort, metodeSort;
+				string order;
 	
 				cout << "\n-- MENU SORTING --" << endl;
 				cout << "[1] Id" << endl;
@@ -516,14 +624,23 @@ void daftar_pengguna() {
 				cout << "[3] Jenis Ps" << endl;
 				cout << "[4] Ruang" << endl;
 				cout << "[5] Sisa Waktu" << endl;
-				cout << "[0] Kembali" << endl;
 				cout << "-- Pilih menu sorting   : ";
 				cin >> menuSort;
-				if (menuSort == '0') {
-					menu();
+				cout << "[1] Shell Sort" << endl;
+				cout << "[2] Quick Sort" << endl;
+				cout << "[3] Merge Sort" << endl;
+				cout << "-- Pilih metode sorting : ";
+				cin >> metodeSort;
+				cout << "[1] Ascending" << endl;
+				cout << "[2] Descending" << endl;
+				cout << "[0] Kembali" << endl;
+				cout << "-- Sorting Secara(1/2)  : ";
+				cin >> order;
+				if (order == "0") {
+					cout << endl;
+					kembali();
 				} else {
-					string order = menu_sorting(menuSort);
-					
+					order = menu_sorting(arr1, arr2, head, menuSort, metodeSort, order);
 					cout << "\nBerhasil mensorting secara "+order << endl;
 					kembali();
 				}
@@ -545,9 +662,11 @@ void daftar_pengguna() {
 				cout << "-- Pilih metode searching : ";
 				cin >> metodeSearch;
 				if (metodeSearch == '0') {
-					menu();
+					cout << endl;
+					kembali();
 				} else {
-					menu_searching(menuSearch, metodeSearch);
+					menu_sorting(arr1, arr2, head, menuSearch, '1', "1");
+					menu_searching(arr1, arr2, head, menuSearch, metodeSearch);
 					kembali();
 				}
 			} else {
@@ -558,29 +677,29 @@ void daftar_pengguna() {
 			cout << "|========================================================|\n";
 			cout << "*daftar data pengguna akan tampil jika ada perental\n\n";
 			kembali();
-}}}
+}}
 
-int shell_sort(Pelanggan *perental, int &n, string order, char menuSort) {
+int shell_sort(string arr1[], int arr2[], int &n, string order, char menuSort) {
 	if (menuSort == '1' || menuSort == '3' || menuSort == '5') {
 		for (int gap = n/2; gap > 0; gap /= 2) {
 			if (order == "Ascending") {
 				for (int i = gap; i < n; i += 1) {
-					Pelanggan temp = perental[i];
+					int temp = arr2[i];
 					int j;
-					for (j = i; j >= gap && perental[j - gap].var2 > temp.var2; j -= gap) {
-						perental[j] = perental[j - gap];
+					for (j = i; j >= gap && arr2[j - gap] > temp; j -= gap) {
+						arr2[j] = arr2[j - gap];
 					}
-				perental[j] = temp;
+				arr2[j] = temp;
 				}
 			}
 			else if (order == "Descending") {
 				for (int i = gap; i < n; i += 1) {
-					Pelanggan temp = perental[i];
+					int temp = arr2[i];
 					int j;
-					for (j = i; j >= gap && perental[j - gap].var2 < temp.var2; j -= gap) {
-						perental[j] = perental[j - gap];
+					for (j = i; j >= gap && arr2[j - gap] < temp; j -= gap) {
+						arr2[j] = arr2[j - gap];
 					}
-				perental[j] = temp;
+				arr2[j] = temp;
 				}
 			}	
 		}
@@ -588,22 +707,22 @@ int shell_sort(Pelanggan *perental, int &n, string order, char menuSort) {
 		for (int gap = n/2; gap > 0; gap /= 2) {
 			if (order == "Ascending") {
 				for (int i = gap; i < n; i += 1) {
-					Pelanggan temp = perental[i];
+					string temp = arr1[i];
 					int j;
-					for (j = i; j >= gap && perental[j - gap].var1 > temp.var1; j -= gap) {
-						perental[j] = perental[j - gap];
+					for (j = i; j >= gap && arr1[j - gap] > temp; j -= gap) {
+						arr1[j] = arr1[j - gap];
 					}
-				perental[j] = temp;
+				arr1[j] = temp;
 				}
 			}
 			else if (order == "Descending") {
 				for (int i = gap; i < n; i += 1) {
-					Pelanggan temp = perental[i];
+					string temp = arr1[i];
 					int j;
-					for (j = i; j >= gap && perental[j - gap].var1 < temp.var1; j -= gap) {
-						perental[j] = perental[j - gap];
+					for (j = i; j >= gap && arr1[j - gap] < temp; j -= gap) {
+						arr1[j] = arr1[j - gap];
 					}
-				perental[j] = temp;
+					arr1[j] = temp;
 				}
 			}	
 		}
@@ -611,84 +730,84 @@ int shell_sort(Pelanggan *perental, int &n, string order, char menuSort) {
 	return 0;
 }
 
-void quick_sort(Pelanggan *perental, int low, int high, string order, char menuSort) {
+void quick_sort(string arr1[], int arr2[], int low, int high, string order, char menuSort) {
 	if (menuSort == '1' || menuSort == '3' || menuSort == '5') {
 		if (low < high) {
-			Pelanggan pivot = perental[high];
+			int pivot = arr2[high];
 			int i = (low - 1);
 			for (int j = low; j <= high - 1; j++) {
 				if (order == "Ascending") {
-					if (perental[j].var2 < pivot.var2) {
+					if (arr2[j] < pivot) {
 						i++;
-						int t = perental[i].var2;
-						perental[i].var2 = perental[j].var2;
-						perental[j].var2 = t;
+						int t = arr2[i];
+						arr2[i] = arr2[j];
+						arr2[j] = t;
 					}
 				} else if (order == "Descending") {
-					if (perental[j].var2 > pivot.var2) {
+					if (arr2[j] > pivot) {
 						i++;
-						int t = perental[i].var2;
-						perental[i].var2 = perental[j].var2;
-						perental[j].var2 = t;
+						int t = arr2[i];
+						arr2[i] = arr2[j];
+						arr2[j] = t;
 					}
 				} 
 			}
-			Pelanggan t = perental[i + 1];
-			perental[i + 1] = perental[high];
-			perental[high] = t;
+			int t = arr2[i + 1];
+			arr2[i + 1] = arr2[high];
+			arr2[high] = t;
 			int pi = i + 1;
 			
-			quick_sort(perental, low, pi - 1, order, menuSort);
-			quick_sort(perental, pi + 1, high, order, menuSort);
+			quick_sort(arr1, arr2, low, pi - 1, order, menuSort);
+			quick_sort(arr1, arr2, pi + 1, high, order, menuSort);
 		}
 	} else if (menuSort == '2' || menuSort == '4') {
 		if (low < high) {
-			Pelanggan pivot = perental[high];
+			string pivot = arr1[high];
 			int i = (low - 1);
 			for (int j = low; j <= high - 1; j++) {
 				if (order == "Ascending") {
-					if (perental[j].var1 < pivot.var1) {
+					if (arr1[j] < pivot) {
 						i++;
-						string t = perental[i].var1;
-						perental[i].var1 = perental[j].var1;
-						perental[j].var1 = t;
+						string t = arr1[i];
+						arr1[i] = arr1[j];
+						arr1[j] = t;
 					}
 				} else if (order == "Descending") {
-					if (perental[j].var1 > pivot.var1) {
+					if (arr1[j] > pivot) {
 						i++;
-						string t = perental[i].var1;
-						perental[i].var1 = perental[j].var1;
-						perental[j].var1 = t;
+						string t = arr1[i];
+						arr1[i] = arr1[j];
+						arr1[j] = t;
 					}
 				} 
 			}
-			Pelanggan t = perental[i + 1];
-			perental[i + 1] = perental[high];
-			perental[high] = t;
+			string t = arr1[i + 1];
+			arr1[i + 1] = arr1[high];
+			arr1[high] = t;
 			int pi = i + 1;
 			
-			quick_sort(perental, low, pi - 1, order, menuSort);
-			quick_sort(perental, pi + 1, high, order, menuSort);
+			quick_sort(arr1, arr2, low, pi - 1, order, menuSort);
+			quick_sort(arr1, arr2, pi + 1, high, order, menuSort);
 		}
 	}
 }
 
-void merge_sort(Pelanggan *perental, int l, int r, string order, char menuSort) {
+void merge_sort(string arr1[], int arr2[], int l, int r, string order, char menuSort) {
 	if (menuSort == '1' || menuSort == '3' || menuSort == '5') {
 		if (l < r) {
 			int m = l+(r-l)/2;
-			merge_sort(perental, l, m, order, menuSort);
-			merge_sort(perental, m+1, r, order, menuSort);
+			merge_sort(arr1, arr2, l, m, order, menuSort);
+			merge_sort(arr1, arr2, m+1, r, order, menuSort);
 			
 			int i, j, k;
 			int n1 = m - l + 1;
 			int n2 = r - m;
-			Pelanggan L[n1], R[n2];
+			int L[n1], R[n2];
 
 			for (i = 0; i < n1; i++) {
-				L[i] = perental[l + i];
+				L[i] = arr2[l + i];
 			} 	for (j = 0; j < n2; j++) {
-					R[j] = perental[m + 1+ j];
+					R[j] = arr2[m + 1+ j];
 				}
 
 			i = 0; 
@@ -696,32 +815,32 @@ void merge_sort(Pelanggan *perental, int l, int r, string order, char menuSort) 
 			k = l; 
 			while (i < n1 && j < n2) {
 				if (order == "Ascending") {
-					if (L[i].var2 <= R[j].var2) {
-						perental[k] = L[i];
+					if (L[i] <= R[j]) {
+						arr2[k] = L[i];
 						i++;
 					} else {
-						perental[k] = R[j];
+						arr2[k] = R[j];
 						j++;
 					}
 				} else if (order == "Descending") {
-					if (L[i].var2 > R[j].var2) {
-						perental[k] = L[i];
+					if (L[i] > R[j]) {
+						arr2[k] = L[i];
 						i++;
 					} else {
-						perental[k] = R[j];
+						arr2[k] = R[j];
 						j++;
 					}
 				} k++;
 			}
 
 			while (i < n1) {
-				perental[k] = L[i];
+				arr2[k] = L[i];
 				i++;
 				k++;
 			}
 
 			while (j < n2) {
-				perental[k] = R[j];
+				arr2[k] = R[j];
 				j++;
 				k++;
 			}
@@ -729,18 +848,18 @@ void merge_sort(Pelanggan *perental, int l, int r, string order, char menuSort) 
 	} else if (menuSort == '2' || menuSort == '4') {
 		if (l < r) {
 			int m = l+(r-l)/2;
-			merge_sort(perental, l, m, order, menuSort);
-			merge_sort(perental, m+1, r, order, menuSort);
+			merge_sort(arr1, arr2, l, m, order, menuSort);
+			merge_sort(arr1, arr2, m+1, r, order, menuSort);
 			
 			int i, j, k;
 			int n1 = m - l + 1;
 			int n2 = r - m;
-			Pelanggan L[n1], R[n2];
+			string L[n1], R[n2];
 
 			for (i = 0; i < n1; i++) {
-				L[i] = perental[l + i];
+				L[i] = arr1[l + i];
 			} 	for (j = 0; j < n2; j++) {
-					R[j] = perental[m + 1+ j];
+					R[j] = arr1[m + 1+ j];
 				}
 
 			i = 0; 
@@ -748,32 +867,32 @@ void merge_sort(Pelanggan *perental, int l, int r, string order, char menuSort) 
 			k = l; 
 			while (i < n1 && j < n2) {
 				if (order == "Ascending") {
-					if (L[i].var1 <= R[j].var1) {
-						perental[k] = L[i];
+					if (L[i] <= R[j]) {
+						arr1[k] = L[i];
 						i++;
 					} else {
-						perental[k] = R[j];
+						arr1[k] = R[j];
 						j++;
 					}
 				} else if (order == "Descending") {
-					if (L[i].var1 > R[j].var1) {
-						perental[k] = L[i];
+					if (L[i] > R[j]) {
+						arr1[k] = L[i];
 						i++;
 					} else {
-						perental[k] = R[j];
+						arr1[k] = R[j];
 						j++;
 					}
 				} k++;
 			}
 
 			while (i < n1) {
-				perental[k] = L[i];
+				arr1[k] = L[i];
 				i++;
 				k++;
 			}
 
 			while (j < n2) {
-				perental[k] = R[j];
+				arr1[k] = R[j];
 				j++;
 				k++;
 			}
@@ -781,7 +900,7 @@ void merge_sort(Pelanggan *perental, int l, int r, string order, char menuSort) 
 	}
 }
 
-int fibMonaccianSearch(Pelanggan *arr, int x, string y, int n, char menuSearch) {
+int fibMonaccianSearch(string arr1[], int arr2[], int x, string y, int n, char menuSearch) {
 	if (menuSearch == '2' || menuSearch == '4') {
 		int fibMMm2 = 0;
 		int fibMMm1 = 1;
@@ -795,12 +914,12 @@ int fibMonaccianSearch(Pelanggan *arr, int x, string y, int n, char menuSearch) 
 
 		while (fibM > 1) {
 			int i = min(offset+fibMMm2, n-1);
-			if (arr[i].var1 < y) {
+			if (arr1[i] < y) {
 				fibM = fibMMm1;
 				fibMMm1 = fibMMm2;
 				fibMMm2 = fibM - fibMMm1;
 				offset = i;
-			} else if (arr[i].var1 > y) {
+			} else if (arr1[i] > y) {
 				fibM = fibMMm2;
 				fibMMm1 = fibMMm1 - fibMMm2;
 				fibMMm2 = fibM - fibMMm1;
@@ -808,7 +927,7 @@ int fibMonaccianSearch(Pelanggan *arr, int x, string y, int n, char menuSearch) 
 				return i;
 			}
 		}
-		if(fibMMm1 && arr[offset+1].var1==y) {
+		if(fibMMm1 && arr1[offset+1] == y) {
 			return offset+1;
 		}
 	} else if (menuSearch == '1' || menuSearch == '3' || menuSearch == '5') {
@@ -824,12 +943,12 @@ int fibMonaccianSearch(Pelanggan *arr, int x, string y, int n, char menuSearch) 
 
 		while (fibM > 1) {
 			int i = min(offset+fibMMm2, n-1);
-			if (arr[i].var2 < x) {
+			if (arr2[i] < x) {
 				fibM = fibMMm1;
 				fibMMm1 = fibMMm2;
 				fibMMm2 = fibM - fibMMm1;
 				offset = i;
-			} else if (arr[i].var2 > x) {
+			} else if (arr2[i] > x) {
 				fibM = fibMMm2;
 				fibMMm1 = fibMMm1 - fibMMm2;
 				fibMMm2 = fibM - fibMMm1;
@@ -837,48 +956,48 @@ int fibMonaccianSearch(Pelanggan *arr, int x, string y, int n, char menuSearch) 
 				return i;
 			}
 		}
-		if(fibMMm1 && arr[offset+1].var2==x) {
+		if(fibMMm1 && arr2[offset+1] == x) {
 			return offset+1;
 		}
 	}
     return -1;
 }
 
-int jumpSearch(Pelanggan *arr, int x, string y, int n, char menuSearch) {
+int jumpSearch(string arr1[], int arr2[], int x, string y, int n, char menuSearch) {
 	int step = sqrt(n);
 	int prev = 0;
 	if (menuSearch == '2' || menuSearch == '4') {
-		while (arr[min(step, n)-1].var1 < y) {
+		while (arr1[min(step, n)-1] < y) {
 			prev = step;
 			step += sqrt(n);
 			if (prev >= n) {
 				return -1;
 			}
 		}
-		while (arr[prev].var1 < y) {
+		while (arr1[prev] < y) {
 			prev++;
 			if (prev == min(step, n)) {
 				return -1;
 			}
 		}
-		if (arr[prev].var1 == y) {
+		if (arr1[prev] == y) {
 			return prev;
 		}
 	} else if (menuSearch == '1' || menuSearch == '3' || menuSearch == '5') {
-		while (arr[min(step, n)-1].var2 < x) {
+		while (arr2[min(step, n)-1] < x) {
 			prev = step;
 			step += sqrt(n);
 			if (prev >= n) {
 				return -1;
 			}
 		}
-		while (arr[prev].var2 < x) {
+		while (arr2[prev] < x) {
 			prev++;
 			if (prev == min(step, n)) {
 				return -1;
 			}
 		}
-		if (arr[prev].var2 == x) {
+		if (arr2[prev] == x) {
 			return prev;
 		}
 	}
@@ -886,13 +1005,8 @@ int jumpSearch(Pelanggan *arr, int x, string y, int n, char menuSearch) {
 }
 
 int main() {
-	perental[0].nama = "";
-	perental[0].area = "";
-	perental[0].idPs = "";
-	perental[0].id = 0;
-	perental[0].jam = 0;
-	perental[0].jenis = 0;
-	menu();
-
+	while (true) {
+		menu();
+	}
 	return 0;
 }
