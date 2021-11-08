@@ -278,12 +278,18 @@ void menu_harga(){
 }
 
 string menu_sorting(string arr1[], int arr2[], Node *head, char menuSort, char metodeSort, string order) {
-	Node *temp = head;
-	string arrTemp[totalId][6] = {};
+	Node *tempCount = head;
+	int n = 0;
+	while(tempCount != NULL) {
+		n++;
+		tempCount = tempCount->next;
+	}
 
-	order = (order=="1") ? "Ascending" : "Descending"; 
-	int n = totalId+1;
-	for (int i = 0; i < totalId; i++) {
+	Node *temp = head;
+	string arrTemp[n][6] = {};
+
+	order = (order=="1") ? "Ascending" : "Descending";
+	for (int i = 0; i < n; i++) {
 		switch(menuSort) {
 			case '1':
 				arr2[i] = temp->perental->id;
@@ -303,17 +309,18 @@ string menu_sorting(string arr1[], int arr2[], Node *head, char menuSort, char m
 		}
 		temp = temp->next;
 	}
+
 	if (metodeSort == '1') {
-		shell_sort(arr1, arr2, totalId, order, menuSort);
+		shell_sort(arr1, arr2, n, order, menuSort);
 	} else if (metodeSort == '2') {
-		 quick_sort(arr1, arr2, 0, totalId-1, order, menuSort);
+		 quick_sort(arr1, arr2, 0, n - 1, order, menuSort);
 	} else if (metodeSort == '3') {
-		 merge_sort(arr1, arr2, 0, totalId-1, order, menuSort);
+		 merge_sort(arr1, arr2, 0, n - 1, order, menuSort);
 	}
 	
 	Node *temp2 = head;
 	int x = 0;
-	while(x < totalId) {
+	while(x < n) {
 		arrTemp[x][0] = to_string(temp2->perental->id);
 		arrTemp[x][1] = temp2->perental->nama;
 		arrTemp[x][2] = to_string(temp2->perental->jenis);
@@ -325,9 +332,9 @@ string menu_sorting(string arr1[], int arr2[], Node *head, char menuSort, char m
 	}
 	
 	int y = 0;
-	while(y < totalId) {
+	while(y < n) {
 		int z = 0;
-		while(z < totalId) {
+		while(z < n) {
 			switch(menuSort) {
 				case '1':
 					if(arr2[y] == stoi(arrTemp[z][0])) {
@@ -417,10 +424,17 @@ string menu_sorting(string arr1[], int arr2[], Node *head, char menuSort, char m
 }
 
 void menu_searching(string arr1[], int arr2[], Node *head, char menuSearch, char metodeSearch) {
+	Node *tempCount = head;
+	int n = 0;
+	while(tempCount != NULL) {
+		n++;
+		tempCount = tempCount->next;
+	}
+
 	Node *temp = head;
 	string y, nomor;
 	int x;
-	string tempArr[totalId][6] = {};
+	string tempArr[n][6] = {};
 
 	switch (menuSearch) {
 		// Pilihan kategori yang ingin di Search
@@ -444,10 +458,10 @@ void menu_searching(string arr1[], int arr2[], Node *head, char menuSearch, char
 			cout << "-- Masukkan jam yang \n - ingin anda cari : ";
 			cin >> x;
 			break;
-	} 
+	}
 	
 	int k = 0;
-	while(k < totalId) {
+	while(k < n) {
 		tempArr[k][0] = to_string(temp->perental->id);
 		tempArr[k][1] = temp->perental->nama;
 		tempArr[k][2] = to_string(temp->perental->jenis);
@@ -467,9 +481,9 @@ void menu_searching(string arr1[], int arr2[], Node *head, char menuSearch, char
 	cout << "+-----|-----------------|-------|--------|---------------+\n";
 	if (menuSearch == '2' || menuSearch == '4') {
 		if (metodeSearch == '1') {
-			index = fibMonaccianSearch(arr1, arr2, x, y, totalId-1, menuSearch);
+			index = fibMonaccianSearch(arr1, arr2, x, y, n - 1, menuSearch);
 		} else if (metodeSearch == '2') {
-			index = jumpSearch(arr1, arr2, x, y, totalId, menuSearch);
+			index = jumpSearch(arr1, arr2, x, y, n, menuSearch);
 		}
 		if (index != -1) {
 			arr1[index] = "";
@@ -481,11 +495,11 @@ void menu_searching(string arr1[], int arr2[], Node *head, char menuSearch, char
 			j++;
 		}
 	} else if (menuSearch == '1' || menuSearch == '3' || menuSearch == '5') {
-		for (int i = 0; i < totalId; i++) {
+		for (int i = 0; i < n; i++) {
 			if (metodeSearch == '1') {
-				index = fibMonaccianSearch(arr1, arr2, x, y, totalId-1, menuSearch);
+				index = fibMonaccianSearch(arr1, arr2, x, y, n - 1, menuSearch);
 			} else if (metodeSearch == '2') {
-				index = jumpSearch(arr1, arr2, x, y, totalId, menuSearch);
+				index = jumpSearch(arr1, arr2, x, y, n, menuSearch);
 			}
 			if (index != -1) {
 				arr2[index] = -1;
@@ -530,31 +544,35 @@ void ganti_struct(Node *head, int &usr) {
 	kembali();
 }
 
-// Dapat menghapus data dari linkedList sesuai id yang diinginkan
-void hapus_data(struct Node** headUsr, int deltId) {
-	struct Node *temp = *headUsr, *prev;
-
-	if (temp != NULL && temp->data == deltId) {
-		*headUsr = temp->next;
-		free(temp);
+void hapus_data(Node **headUsr, int pos) {
+	
+	if (pos == 1) {
+		if(*headUsr == NULL) {
+			cout << "\nGagal menghapus, data perental kosong\n";
+			kembali();
+		}
+		Node *temp = *headUsr;
+		*headUsr = (*headUsr)->next;
+		delete temp;
 		cout << "\nData berhasil dihapus!" << endl;
-		totalId--;
+		kembali();
+	} else if (pos == 2) {
+		if(*headUsr == NULL) {
+			cout << "\nGagal menghapus, data perental kosong\n";
+			kembali();
+		} if((*headUsr)->next == NULL) {
+			*headUsr = NULL;
+			cout << "\nData berhasil dihapus!" << endl;
+			kembali();
+		}
+		Node *temp = *headUsr;
+		while(temp->next->next != NULL) {
+			temp = temp->next;
+		}
+		temp->next = NULL;
+		cout << "\nData berhasil dihapus!" << endl;
 		kembali();
 	}
-	while (temp != NULL && temp->data != deltId) {
-		prev = temp;
-		temp = temp->next;
-	}
-	if (temp == NULL) {
-		cout << "\nGagal menghapus, id tidak ditemukan\n";
-		kembali();
-	}
-	prev->next = temp->next;
-	free(temp);
-
-	cout << "\nData berhasil dihapus!" << endl;
-	totalId--;
-	kembali();
 }
 
 void daftar_pengguna(struct Node* nodeUser) {
@@ -562,8 +580,16 @@ void daftar_pengguna(struct Node* nodeUser) {
 	char opsi2;
 	int usr, idPs;
 	int k = 0;
-	string arr1[totalId] = {};
-	int arr2[totalId] = {};
+	int n = 0;
+
+	Node *tempCount = nodeUser;
+	while(tempCount != NULL) {
+		n++;
+		tempCount = tempCount->next;
+	}
+
+	string arr1[n] = {};
+	int arr2[n] = {};
 	
 	cout << " =======================DAFTAR PENGGUNA==================\n";
 	cout << "|========================================================|\n";
@@ -601,19 +627,30 @@ void daftar_pengguna(struct Node* nodeUser) {
 				ganti_struct(head, usr);
 
 			} else if (opsi2 == '2') {
-				cout << "--- Masukkan user id  : "; cin >> usr;
-
+				int pos;
+				cout << "[1] Hapus Depan" << endl;
+				cout << "[2] Hapus Belakang" << endl;
+				cout << "--- Hapus data dari  : "; cin >> pos;
+				// Mengubah status pada menu harga menjadi tersedia
 				Node *temp = head;
 				while (temp != NULL) {
-					if (temp->perental->id == usr) {
-						stringstream ubah(temp->perental->idPs);
-						ubah >> idPs;
+					if (pos == 1) {
+						stringstream statusPs(temp->perental->idPs);
+						statusPs >> idPs;
 						ps[idPs-1][4] = "Tersedia";
+						temp = temp->next;
 						break;
+					} else if (pos == 2) {
+						if (temp->perental->id == n) {
+							stringstream statusPs(temp->perental->idPs);
+							statusPs >> idPs;
+							ps[idPs-1][4] = "Tersedia";
+							break;
+						}
+						temp = temp->next;
 					}
-					temp = temp->next;
 				}
-				hapus_data(&head, usr-1);
+				hapus_data(&head, pos);
 			} else if (opsi2 == '3') {
 				char menuSort, metodeSort;
 				string order;
