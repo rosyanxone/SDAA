@@ -21,7 +21,6 @@ struct Pelanggan {
 };
 
 struct Node {
-	int data;
 	struct Node *next;
     Pelanggan perental[100];
 }; struct Node* head = NULL;
@@ -95,7 +94,6 @@ void menu_rental(Node **head) {
     int jenisPs[10];
     Node *nodeBaru = new Node();
 
-    nodeBaru->data = totalId;
 	nodeBaru->perental->id = totalId;
 	totalId++;
 	
