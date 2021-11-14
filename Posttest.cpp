@@ -9,24 +9,22 @@
 using namespace std;
 
 int totalId = 0;
-int kembali();
+bool jalan = true;
 void menu_harga();
+void menu();
+int kembali();
 int main();
 
 struct Pelanggan {
 	string nama, area, idPs;
 	int id, jenis, jam;
-	string var1;
-	int var2;
 };
 
 struct Node {
 	struct Node *next;
+	struct Node *prev;
     Pelanggan perental[100];
-}; struct Node* head = NULL;
-
-void menu_rental(Node **head);
-void daftar_pengguna(struct Node* nodeUser);
+}; Node* head = NULL, *tail = NULL;
 
 int shell_sort(string arr1[], int arr2[], int &n, string order, char menuSort);
 void quick_sort(string arr1[], int arr2[], int low, int high, string order, char menuSort);
@@ -49,51 +47,10 @@ string ps[10][5] = {
 	{"9", "Ps 1", "Area 9", "Rp.5000" , "Tersedia"}
 };
 
-void menu() {
-	char masuk;
-	system("cls");
-	cout << "===== PIXEL RENTAL PS =====" << endl;
-	cout << "+-------------------------+" << endl;
-	cout << "| [1] Rental Now          |" << endl;
-	cout << "| [2] Daftar Harga        |" << endl;
-	cout << "| [3] Daftar Pengguna	  |" << endl;
-	cout << "| [0] Keluar Program      |" << endl;
-	cout << "+-------------------------+" << endl;
-	cout << "--- Masukkan menu: ";
-	cin >> masuk;
-	
-	switch (masuk) {
-		case '0':
-			cout << " -- Program selesai..." << endl;
-			exit(0);
-			break;
-		case '1':
-			menu_rental(&head);
-			break;
-		case '2':
-			menu_harga();
-			break;
-		case '3':
-			daftar_pengguna(head);
-			break;
-		default:			
-			cout << "\nPilihan anda tidak valid!\n";
-			kembali();
-	}
-}
-
-int kembali() {
-	system("pause");
-	menu();
-	
-	return 0;
-}
-
-void menu_rental(Node **head) {
+void menu_rental(Node **head, Node **tail, int insert) {
 	system("cls");
     int jenisPs[10];
     Node *nodeBaru = new Node();
-
 	nodeBaru->perental->id = totalId;
 	totalId++;
 	
@@ -150,7 +107,7 @@ void menu_rental(Node **head) {
 				string price = ps[iPs][3];
 				for (int j = 0; j < 3; j++) {
 					price[j] = '0';
-				} harga = stoi(price); // jika stoi error pastikan untuk mengupdate compiler ke C++11
+				} harga = stoi(price);
 
 				nodeBaru->perental->area = ps[iPs][2];
 				nodeBaru->perental->idPs = ps[iPs][0];
@@ -189,7 +146,6 @@ void menu_rental(Node **head) {
 				} outfile.close();
 				ifstream infile;
 				
-				// File eksternal berupa txt
 				// Menampilkan isi struk / isi dari file .txt
 				infile.open(file.c_str());
 				while (getline (infile,baris)) {
@@ -197,17 +153,34 @@ void menu_rental(Node **head) {
 				} infile.close();
 
 				cout << "Struk anda disimpan dalam bentuk file .txt" << endl;
-    
-				nodeBaru->next = NULL;
-				if (*head == NULL) {
+				if(*head == NULL) {
 					*head = nodeBaru;
-					kembali();
-				}
-				Node *temp = *head;
-				while (temp->next != NULL) {
-					temp = temp->next;
-				}
-				temp->next = nodeBaru;
+					*tail = nodeBaru;
+				} else {
+					if(insert == 1) {
+						nodeBaru->prev = NULL;
+						nodeBaru->next = *head;
+						(*head)->prev = nodeBaru;
+						(*head) = nodeBaru;
+					} else if(insert >= totalId) {
+						nodeBaru->prev = *tail;
+						nodeBaru->next = NULL;
+						(*tail)->next = nodeBaru;
+						(*tail) = nodeBaru;
+					} else {
+						Node *currentNode = *head;
+						int x = 0;
+						while(x < insert-2) {
+							currentNode = currentNode->next;
+							x++;
+						}
+						Node *afterNode = currentNode->next;
+						nodeBaru->prev = currentNode;
+						nodeBaru->next = afterNode;
+						currentNode->next = nodeBaru;
+						afterNode->prev = nodeBaru;
+					}
+                }
 				kembali();
 }}}}
 
@@ -539,48 +512,67 @@ void ganti_struct(Node *head, int &usr) {
 		head = head->next;
 	}
 	cout << "\nGagal mengedit, id tidak ditemukan\n";
-	kembali();
+	return;
 }
 
-void hapus_data(Node **headUsr, int pos) {
+void hapus_data(Node **headUsr, Node **tailUsr, int delId) {
 	
-	if (pos == 1) {
-		if(*headUsr == NULL) {
-			cout << "\nGagal menghapus, data perental kosong\n";
-			kembali();
-		}
-		Node *temp = *headUsr;
-		*headUsr = (*headUsr)->next;
-		delete temp;
-		cout << "\nData berhasil dihapus!" << endl;
-		kembali();
-	} else if (pos == 2) {
-		if(*headUsr == NULL) {
-			cout << "\nGagal menghapus, data perental kosong\n";
-			kembali();
-		} if((*headUsr)->next == NULL) {
+    if(*headUsr == NULL) {
+        cout << "\nGagal menghapus, data perental kosong\n";
+        kembali();
+    } else {
+		Node *currentNode = *headUsr;
+		if((*headUsr)->next == NULL) {
 			*headUsr = NULL;
+			*tailUsr = NULL;
 			cout << "\nData berhasil dihapus!" << endl;
-			kembali();
-		}
-		Node *temp = *headUsr;
-		while(temp->next->next != NULL) {
-			temp = temp->next;
-		}
-		temp->next = NULL;
-		cout << "\nData berhasil dihapus!" << endl;
-		kembali();
+			return;
+		} else {
+			while(currentNode != NULL) {
+				if(currentNode->perental->id == delId) {
+					if(currentNode->prev == NULL) {
+						Node *deleteNode = *headUsr;
+						*headUsr = currentNode->next;
+						(*headUsr)->prev = NULL;
+						delete deleteNode;
+						cout << "\nData berhasil dihapus!" << endl;
+						return;
+						break;
+					} else if(currentNode->next == NULL) {
+						Node *deleteNode = *tailUsr;
+						*tailUsr = (*tailUsr)->prev;
+						(*tailUsr)->next = NULL;
+						delete deleteNode;
+						cout << "\nData berhasil dihapus!" << endl;
+						return;
+						break;
+					} else {
+						currentNode = currentNode->prev;
+						break;
+					}
+				}
+				currentNode = currentNode->next;
+			}
+			
+			Node *deleteNode = currentNode->next;
+			Node *afterNode = deleteNode->next;
+			currentNode->next = afterNode;
+			afterNode->prev = currentNode;
+			delete deleteNode;
+			cout << "\nData berhasil dihapus!" << endl;
+			return;
+		}	
 	}
 }
 
-void daftar_pengguna(struct Node* nodeUser) {
+void daftar_pengguna(Node *nodeUserHead, Node *nodeUserTail, char from) {
 	system("cls");
 	char opsi2;
 	int usr, idPs;
 	int k = 0;
 	int n = 0;
 
-	Node *tempCount = nodeUser;
+	Node *tempCount = nodeUserHead;
 	while(tempCount != NULL) {
 		n++;
 		tempCount = tempCount->next;
@@ -592,25 +584,36 @@ void daftar_pengguna(struct Node* nodeUser) {
 	cout << " =======================DAFTAR PENGGUNA==================\n";
 	cout << "|========================================================|\n";
 	cout << "| ID  | NAMA \t\t| JENIS | RUANG  | SELESAI DALAM |\n";
-	if (nodeUser == NULL) {
+	if (nodeUserHead == NULL) {
 		cout << "| --- | ---  \t\t| ---   | ---    | ---           |\n";
 		cout << "|========================================================|\n";
 		cout << "*daftar pengguna akan tampil jika ada perental\n\n";
 		kembali();
 
 	} cout << "+-----|-----------------|-------|--------|---------------+\n";
-	while (nodeUser != NULL) {
-		if (nodeUser->perental->nama == "" && nodeUser->perental->id == -1) {
-			continue;
-		} else if (nodeUser->perental->nama.size() < 7 && nodeUser->perental->id > 0) {
-			cout << "|  " << nodeUser->perental->id << "  | "<< nodeUser->perental->nama << " \t\t| Ps " << nodeUser->perental->jenis << "  | " << nodeUser->perental->area << " | " << nodeUser->perental->jam <<" jam \t |\n";
-			k++;
-		} else if (nodeUser->perental->nama.size() < 13 && nodeUser->perental->id > 0) {
-			cout << "|  " << nodeUser->perental->id << "  | " << nodeUser->perental->nama << " \t| Ps " << nodeUser->perental->jenis << "  | " << nodeUser->perental->area << " | " << nodeUser->perental->jam <<" jam \t |\n";
-			k++;
-		}
-		nodeUser = nodeUser->next;
-	} if (k > 0) {
+    if(from == '2') {
+        while (nodeUserTail != NULL) {
+            if (nodeUserTail->perental->nama.size() < 7 && nodeUserTail->perental->id > 0) {
+                cout << "|  " << nodeUserTail->perental->id << "  | "<< nodeUserTail->perental->nama << " \t\t| Ps " << nodeUserTail->perental->jenis << "  | " << nodeUserTail->perental->area << " | " << nodeUserTail->perental->jam <<" jam \t |\n";
+                k++;
+            } else if (nodeUserTail->perental->nama.size() < 13 && nodeUserTail->perental->id > 0) {
+                cout << "|  " << nodeUserTail->perental->id << "  | " << nodeUserTail->perental->nama << " \t| Ps " << nodeUserTail->perental->jenis << "  | " << nodeUserTail->perental->area << " | " << nodeUserTail->perental->jam <<" jam \t |\n";
+                k++;
+            }
+            nodeUserTail = nodeUserTail->prev;
+        }
+    } else if(from == '1') {
+        while (nodeUserHead != NULL) {
+            if (nodeUserHead->perental->nama.size() < 7 && nodeUserHead->perental->id > 0) {
+                cout << "|  " << nodeUserHead->perental->id << "  | "<< nodeUserHead->perental->nama << " \t\t| Ps " << nodeUserHead->perental->jenis << "  | " << nodeUserHead->perental->area << " | " << nodeUserHead->perental->jam <<" jam \t |\n";
+                k++;
+            } else if (nodeUserHead->perental->nama.size() < 13 && nodeUserHead->perental->id > 0) {
+                cout << "|  " << nodeUserHead->perental->id << "  | " << nodeUserHead->perental->nama << " \t| Ps " << nodeUserHead->perental->jenis << "  | " << nodeUserHead->perental->area << " | " << nodeUserHead->perental->jam <<" jam \t |\n";
+                k++;
+            }
+            nodeUserHead = nodeUserHead->next;
+        }
+    } if (k > 0) {
 		cout << "|========================================================|\n";
 		cout << "[1] Edit Pengguna" << endl;
 		cout << "[2] Hapus Pengguna" << endl;
@@ -621,34 +624,27 @@ void daftar_pengguna(struct Node* nodeUser) {
 		cin >> opsi2;
 			
 			if (opsi2 == '1') {
-				cout << "--- Masukkan user id  : "; cin >> usr;
+				cout << "--- Masukkan user id yang ingin diubah : "; cin >> usr;
 				ganti_struct(head, usr);
-
+				daftar_pengguna(head, tail, '1');
 			} else if (opsi2 == '2') {
-				int pos;
-				cout << "[1] Hapus Depan" << endl;
-				cout << "[2] Hapus Belakang" << endl;
-				cout << "--- Hapus data dari  : "; cin >> pos;
+				int delId;
+				cout << "--- Masukkan user id yang ingin dihapus: "; cin >> delId;
+				
 				// Mengubah status pada menu harga menjadi tersedia
-				Node *temp = head;
-				while (temp != NULL) {
-					if (pos == 1) {
-						stringstream statusPs(temp->perental->idPs);
+				Node *tempHead = head;
+				while(tempHead != NULL) {
+					if(stoi(tempHead->perental->idPs) == delId) {
+						stringstream statusPs(tempHead->perental->idPs);
 						statusPs >> idPs;
 						ps[idPs-1][4] = "Tersedia";
-						temp = temp->next;
 						break;
-					} else if (pos == 2) {
-						if (temp->perental->id == n) {
-							stringstream statusPs(temp->perental->idPs);
-							statusPs >> idPs;
-							ps[idPs-1][4] = "Tersedia";
-							break;
-						}
-						temp = temp->next;
 					}
+					tempHead = tempHead->next;
 				}
-				hapus_data(&head, pos);
+				hapus_data(&head, &tail, delId);
+				system("pause");
+				daftar_pengguna(head, tail, '1');
 			} else if (opsi2 == '3') {
 				char menuSort, metodeSort;
 				string order;
@@ -676,8 +672,9 @@ void daftar_pengguna(struct Node* nodeUser) {
 					kembali();
 				} else {
 					order = menu_sorting(arr1, arr2, head, menuSort, metodeSort, order);
-					cout << "\nBerhasil mensorting secara "+order << endl;
-					kembali();
+					cout << "\nBerhasil mensorting secara " + order << endl;
+					system("pause");
+					daftar_pengguna(head, tail, '1');
 				}
 				
 			} else if (opsi2 == '4') {
@@ -702,7 +699,8 @@ void daftar_pengguna(struct Node* nodeUser) {
 				} else {
 					menu_sorting(arr1, arr2, head, menuSearch, '1', "1");
 					menu_searching(arr1, arr2, head, menuSearch, metodeSearch);
-					kembali();
+					system("pause");
+					daftar_pengguna(head, tail, '1');
 				}
 			} else {
 				menu();
@@ -1039,9 +1037,60 @@ int jumpSearch(string arr1[], int arr2[], int x, string y, int n, char menuSearc
 	return -1;
 }
 
+void menu() {
+	char masuk;
+	system("cls");
+	cout << "===== PIXEL RENTAL PS =====" << endl;
+	cout << "+-------------------------+" << endl;
+	cout << "| [1] Rental Now          |" << endl;
+	cout << "| [2] Daftar Harga        |" << endl;
+	cout << "| [3] Daftar Pengguna	  |" << endl;
+	cout << "| [0] Keluar Program      |" << endl;
+	cout << "+-------------------------+" << endl;
+	cout << "--- Masukkan menu       : ";
+	cin >> masuk;
+	
+	switch (masuk) {
+		case '0':
+            jalan = false;
+            cout << " -- Program selesai..." << endl;
+			exit(0);
+			break;
+		case '1':
+            int insert;
+            cout << " -- Menambah di posisi  : ke-";
+            cin >> insert;
+			menu_rental(&head, &tail, insert);
+			break;
+		case '2':
+			menu_harga();
+			break;
+		case '3':
+            char from;
+            // Pilihan menampilkan dengan head to tail atau sebaliknya
+            cout << "--- [1] Forward           |" << endl;
+            cout << "--- [2] Backward          |" << endl;
+            cout << " -- Tampilkan data dari : ";
+            cin >> from;
+			daftar_pengguna(head, tail, from);
+			break;
+		default:			
+			cout << "\nPilihan anda tidak valid!\n";
+			kembali();
+	}
+}
+
+int kembali() {
+	system("pause");
+	menu();
+	
+	return 0;
+}
+
 int main() {
-	while (true) {
+	while (jalan) {
 		menu();
 	}
-	return 0;
+	
+    return 0;
 }
