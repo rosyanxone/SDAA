@@ -2,6 +2,8 @@
 #include <conio.h>
 #include <bits/stdc++.h>
 #include <sstream>
+#include <windows.h>
+
 using namespace std;
 
 struct User {
@@ -80,7 +82,8 @@ void dataPs(Node **top) {
 }
 
 int main() {
-    dataPs(&TOP);
+    system ("color 2");
+	dataPs(&TOP);
     char menu;
     while (menu != 'x') {
         system("CLS");
