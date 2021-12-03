@@ -1,0 +1,1275 @@
+#include <iostream>
+#include <conio.h>
+#include <bits/stdc++.h>
+#include <sstream>
+using namespace std;
+
+struct User {
+    string username, password, nama, alamat;
+    int id, userPsId, total, umur;
+};
+
+struct Ps {
+    int idPs, idUsr, harga, lama, var2;
+    string room, jenisPs, status, var1;
+};
+
+struct Bayar {
+    int tagihan, diterima, kembali, idUser, idPsUser;
+    string status;
+};
+
+struct Node {
+    Bayar dataBayar;
+    User customer;
+    Ps daftarPs;
+    Node *next;
+}; 
+
+int idPees = 9;
+int idUser = 0;
+Node *FRONT = NULL, *REAR = NULL, *TOP = NULL, *HEAD = NULL;
+
+/// ADMIN
+void admin(); void menu_admin(); void menu_admin1(Node *head); void menu_admin2(Node *head); void menu_admin3(Node *front, Node *top);
+void user_changePwd(Node *front); void user_changeData(Node *front); void user_delAcc(Node **front, Node *top);
+void dataPs_add(Node **top); void dataPs_edt(Node *top); void dataPs_rem(Node **top);
+void dataBayar_user(Node *head, Node *front); void remRental_user(Node *top);
+/// USER
+void user(); void user_buatAkun(Node **front, Node **rear); void user_loginAkun(Node *front);
+void menu_user(); void user_menu1(Node *front, Node *top, Node **head); void user_menu2(Node *top); void user_menu3(Node *front, Node *top);
+string menu_sort(Node *top, string order, char menuSort); int shell_sort(Ps *dataPs, int &n, string order, char menuSort);
+void menu_search(Node *top, char menuSearch); int jumpSearch(Ps *arr, int x, string y, int n, char menuSearch);
+
+string ps[9][5] = {
+	{"1", "Ps 3", "Area 1", "5000", "Tersedia"},
+	{"2", "Ps 4", "Area 8", "8000", "Tersedia"},
+	{"3", "Ps 2", "Area 4", "3000", "Tersedia"},
+	{"4", "Ps 1", "Area 2", "2000", "Tersedia"},
+	{"5", "Ps 2", "Area 7", "3000", "Tersedia"},
+	{"6", "Ps 2", "Area 3", "3000", "Tersedia"},
+	{"7", "Ps 4", "Area 9", "8000", "Tersedia"},
+	{"8", "Ps 3", "Area 6", "5000", "Tersedia"},
+	{"9", "Ps 3", "Area 5", "5000", "Tersedia"},
+};
+
+string tab(string word, int chara) {
+    string tab = " \t";
+    if((word).size() < chara) {
+        tab = " \t\t";
+    }
+    return word+tab;
+}
+
+void dataPs(Node **top) {  
+    for (int i = 0; i < idPees; i++) {
+    	Node *nodeBaru = new Node();
+        nodeBaru->daftarPs.idPs = stoi(ps[i][0]);
+        nodeBaru->daftarPs.jenisPs = ps[i][1];
+        nodeBaru->daftarPs.room = ps[i][2];
+        nodeBaru->daftarPs.harga = stoi(ps[i][3]);
+        nodeBaru->daftarPs.status = ps[i][4];
+        if(*top == NULL) {
+            *top = nodeBaru;
+        } else {
+            nodeBaru->next = *top;
+            *top = nodeBaru;
+        }
+    }
+    return;
+}
+
+int main() {
+    dataPs(&TOP);
+    char menu;
+    while (menu != 'x') {
+        system("CLS");
+        cout << " _________________________________________________________ " << endl;
+        cout << "|                       PIXEL RENTAL PS                   |" << endl;
+        cout << "+=========================================================+" << endl;
+        cout << "| [1] Admin                                               |" << endl;
+        cout << "| [2] User                                                |" << endl;
+        cout << "| [x] Exit                                                |" << endl;
+        cout << "| >>> Pilih masuk sebagai : "; cin >> menu;
+        
+        switch(menu) {
+            case '1':
+                admin();
+                break;
+            case '2':
+                user();
+                break;
+            case 'x':
+                cout << "| <<< Terimakasih telah menggunakan program.              |" << endl;
+                cout << "+=========================================================+" << endl;
+                exit(0);
+                break;
+            default:
+                cout << "| <<< Input anda tidak valid!                             |" << endl;
+                cout << "+=========================================================+\n" << endl;
+                system("PAUSE");
+        }
+    }
+    return 0;
+}
+
+void admin() {
+    char input;
+    system("CLS");
+    cout << " _________________________________________________________ " << endl;
+    cout << "|                     MASUK SEBAGAI ADMIN                 |" << endl;
+    cout << "+=========================================================+" << endl;
+    cout << "| [1] Login                                               |" << endl;
+    cout << "| [0] Kembali                                             |" << endl;
+    cout << "| >>> Pilih menu anda      : "; cin >> input;
+    
+    if(input == '1') {
+        string uname, pwd;
+        char ch;
+        cout << "| >>> Masukkan username    : "; cin >> uname;
+        cout << "| >>> Masukkan password    : "; cin >> pwd;
+
+        if(uname == "admin") {
+            if(pwd == "admin") {
+                cout << "| <<< Login berhasil!                                     |" << endl;
+                cout << "+=========================================================+\n" << endl;
+                system("PAUSE");
+                menu_admin();
+            } else {
+                cout << "| <<< Username/password anda salah!                       |" << endl;
+                cout << "+=========================================================+\n" << endl;
+                system("PAUSE");
+                admin();
+            }
+        } else {
+            cout << "| <<< Akun tidak ditemukan!                               |" << endl;
+            cout << "+=========================================================+\n" << endl;
+            system("PAUSE");
+            admin();
+        }
+    }
+    return;
+}
+
+void menu_admin() {
+    char menuAdmin;
+    system("CLS");
+    cout << " ____________________________________ " << endl;
+    cout << "|             MENU ADMIN             |" << endl;
+    cout << "+====================================+" << endl;
+    cout << "| [1] Daftar User                    |" << endl;
+    cout << "| [2] Daftar Ps                      |" << endl;
+    cout << "| [3] Daftar Bermain User            |" << endl;
+    cout << "| [0] Kembali                        |" << endl;
+    cout << "| [x] Exit                           |" << endl;
+    cout << "| >>> Pilih menu anda : "; cin >> menuAdmin;
+    
+    if(menuAdmin == '1') {
+        cout << "+====================================+" << endl;
+        menu_admin1(FRONT);
+    } else if(menuAdmin == '2') {
+        cout << "+====================================+" << endl;
+        menu_admin2(TOP);
+    } else if(menuAdmin == '3') {
+        menu_admin3(FRONT, TOP);
+    } else if(menuAdmin == '0') {
+        return;
+    } else if(menuAdmin == 'x') {
+        cout << "| <<< Program keluar...              |" << endl;
+        cout << "+====================================+" << endl;
+        exit(0);
+    } else {
+        cout << "| <<< Input anda tidak valid!        |" << endl;
+        cout << "+====================================+\n" << endl;
+        system("PAUSE");
+        menu_admin();
+    }
+}
+
+
+void menu_admin1(Node *front) {
+    char menuAdmin1;
+    if(front == NULL) {
+        cout << "\n+===============================================================================+" << endl;
+        cout << "|                                                                               |" << endl;
+        cout << "|                    Data user kosong, atau belum ada pendaftar.                |" << endl;
+        cout << "|                                                                               |" << endl;
+        cout << "+===============================================================================+\n" << endl;
+        system("PAUSE");
+        menu_admin();
+    } else {
+        system("CLS");
+        cout << " _______________________________________________________________________________ " << endl;
+        cout << "| ID | NAMA PENGGUNA    | UMUR  | ALAMAT        | TOTAL MAIN  | USERNAME        |" << endl;
+        cout << "+----+------------------+-------+---------------+-------------+-----------------+" << endl;
+        while (front != NULL) {
+            cout << "| " << front->customer.id << "  | " << tab(front->customer.nama, 8) << "| " << front->customer.umur;
+            cout << " \t| " << tab(front->customer.alamat, 5) << "|  " << front->customer.total << "\tJam   | " << tab(front->customer.username, 7) << "|" << endl;
+            front = front->next;
+        }
+        cout << "+===============================================================================+" << endl;
+        cout << "| [1] Ubah Password" << endl;
+        cout << "| [2] Edit Data" << endl;
+        cout << "| [3] Hapus Akun" << endl;
+        cout << "| [0] Kembali" << endl;
+        cout << "| >>> Pilih menu : "; cin >> menuAdmin1;
+        
+        switch(menuAdmin1) {
+            case '0':
+                cout << "+===============================================================================+" << endl;
+                menu_admin();
+                break;
+            case '1':
+                user_changePwd(FRONT);
+                menu_admin1(FRONT);
+                break;
+            case '2':
+                user_changeData(FRONT);
+                menu_admin1(FRONT);
+                break;
+            case '3':
+                user_delAcc(&FRONT, TOP);
+                menu_admin1(FRONT);
+                break;
+            default:
+                cout << "| <<< Input yang anda masukkan tidak valid!                                     |" << endl;
+                cout << "+===============================================================================+" << endl;
+                system("PAUSE");
+                menu_admin1(FRONT);
+        }
+    }
+}
+
+void user_changePwd(Node *front) {
+    string uname, newPwd, cekPwd;
+    cout << "| >>> Masukkan username        : "; cin >> uname;
+    while(front != NULL) {
+        if(uname == front->customer.username) {
+            cout << "| >>> Masukkan password baru   : "; cin >> newPwd;
+            cout << "| >>> Konfirmasi password baru : "; cin >> cekPwd;
+            if(newPwd == cekPwd) {
+                front->customer.password = newPwd;
+                cout << "| <<< Password berhasil diubah!                                                 |" << endl;
+                break;
+            }
+            cout << "| <<< Anda memasukkan password baru yang beda !                                 |" << endl;
+            break;
+        }
+        front = front->next;
+    } if(front == NULL) {
+        cout << "| >>> Akun user tidak ditemukan!                                                |" << endl;
+    }
+    cout << "+===============================================================================+\n" << endl;
+    system("PAUSE");
+    return;
+}
+
+void user_changeData(Node *front) {
+    int userId; string id;
+    cout << "| >>> Mengubah data id user     : "; cin >> id;
+    stringstream cekInt(id); cekInt >> userId;
+    while(front != NULL) {
+        if(userId == front->customer.id) {
+            cout << "| >>> Masukkan nama user baru   : "; fflush(stdin); getline(cin, front->customer.nama);
+            cout << "| >>> Masukkan umur user baru   : "; cin >> front->customer.umur; 
+            cout << "| >>> Masukkan alamat user baru : "; fflush(stdin); getline(cin, front->customer.alamat);
+            cout << "| >>> Masukkan username baru    : "; fflush(stdin); getline(cin, front->customer.username);
+            cout << "| <<< Data user berhasil diubah!                                                |" << endl;
+            break;
+        }
+        front = front->next;
+    } if(front == NULL) {
+        cout << "| <<< Id user tidak ditemukan!                                                  |" << endl;
+    }
+    cout << "+===============================================================================+\n" << endl;
+    system("PAUSE");
+    return;
+}
+
+void user_delAcc(Node **front, Node *top) {
+    Node *temp = *front;
+    int idUser = (*front)->customer.id;
+    *front = (*front)->next;
+    delete temp;
+    cout << "| <<< Akun berhasil dihapus!                                                    |" << endl;
+    cout << "+===============================================================================+\n" << endl;
+    
+    //  Merubah status ps yang disewa menjadi Tersedia
+    while(top != NULL) {
+        if(top->daftarPs.idUsr == idUser) {
+            top->daftarPs.idUsr = 0;
+            top->daftarPs.status = "Tersedia";
+        }
+        top = top->next;
+    }
+
+    system("PAUSE");
+    return;
+}
+
+
+void menu_admin2(Node *top) {
+    char menuAdmin2;
+    if(top == NULL) {
+        system("CLS");
+        cout << "+===============================================================+" << endl;
+        cout << "|                                                               |" << endl;
+        cout << "|        Data Ps kosong, atau data ps telah dihapus semua.      |" << endl;
+        cout << "|                                                               |" << endl;
+    } else {
+        system("CLS");
+        menu_sort(TOP, "2", '1');
+        cout << " _______________________________________________________________ " << endl;
+        cout << "|  ID   | JENIS PS |   RUANG    |   HARGA/JAM   |    STATUS     |" << endl;
+        cout << "+-------+----------+------------+---------------+---------------+" << endl;
+        while (top != NULL) {
+            cout << "|  " << top->daftarPs.idPs << " \t|   " << top->daftarPs.jenisPs << "   | " << top->daftarPs.room;
+            cout << " \t| Rp." << top->daftarPs.harga << " \t| " << top->daftarPs.status << " \t|" << endl;
+            top = top->next;
+        }
+    }
+    cout << "+===============================================================+" << endl;
+    cout << "| [1] Tambah Data                                               |" << endl;
+    cout << "| [2] Edit Data                                                 |" << endl;
+    cout << "| [3] Hapus Data                                                |" << endl;
+    cout << "| [0] Kembali                                                   |" << endl;
+    cout << "| >>> Pilih menu : "; cin >> menuAdmin2;
+
+    switch(menuAdmin2) {
+        case '0':
+            menu_admin();
+            break;
+        case '1':
+            dataPs_add(&TOP);
+            menu_admin2(TOP);
+            break;
+        case '2':
+            dataPs_edt(TOP);
+            menu_admin2(TOP);
+            break;
+        case '3':
+            dataPs_rem(&TOP);
+            menu_admin2(TOP);
+            break;
+        default:
+            cout << "| <<< Input yang anda masukkan tidak valid!                     |" << endl;
+            cout << "+===============================================================+" << endl;
+    }
+}
+
+void dataPs_add(Node **top) {
+    Node *nodeBaru = new Node();
+    string ruang, jenis; int ps, price;
+    
+    idPees++;
+    nodeBaru->daftarPs.idPs = idPees;
+    cout << "| >>> Masukkan jenis ps  : Ps "; cin >> jenis;
+    stringstream cekInt(jenis); cekInt >> ps;
+    if(ps == 0 || ps > 9) {
+        cout << "| <<< Tidak dapat menambahkan Ps kosong/lebih dari 1 karakter!  |" << endl;
+        idPees--;
+        goto gagal;
+    }
+    nodeBaru->daftarPs.jenisPs = "Ps " + jenis;
+    cout << "| >>> Masukkan ruangan   : Ruang "; cin >> ruang;
+    if((ruang).size() > 2) {
+        cout << "| <<< Tidak dapat menambahkan nomor ruang lebih dari 2 karakter!|" << endl;
+        idPees--;
+        goto gagal;
+    }
+    nodeBaru->daftarPs.room = "Area " + ruang;
+    cout << "| >>> Masukkan harga/jam : Rp."; cin >> price;
+    if(price == 0) {
+        cout << "| <<< Tidak dapat memberikan harga bernilai kosong!             |" << endl;
+        idPees--;
+        goto gagal;
+    }
+    nodeBaru->daftarPs.harga = price;
+    nodeBaru->daftarPs.status = "Tersedia";
+
+    
+	if(*top == NULL) {
+		*top = nodeBaru;
+	} else {
+        nodeBaru->next = *top;
+        *top = nodeBaru;
+    }
+    cout << "| <<< Data Ps berhasil ditambahkan!                             |" << endl;
+    gagal:
+    cout << "+===============================================================+\n" << endl;
+    system("PAUSE");
+    return;
+}
+
+void dataPs_edt(Node *top) {
+    if(top == NULL) {
+        cout << "| <<< Data Ps kosong!!                                          |" << endl;
+        cout << "+===============================================================+\n" << endl;
+        system("PAUSE");
+        return;
+    } else {
+        int psId;
+        cout << "| >>> Mengedit id Ps ke : "; cin >> psId;
+        while(top != NULL) {
+            if(psId == top->daftarPs.idPs) {
+                psId++;
+                if(top->daftarPs.status != "Tersedia") {
+                    cout << "| <<< Tidak dapat mengedit data, Ps sedang digunakan!           |" << endl;
+                    cout << "+===============================================================+\n" << endl;
+                    system("PAUSE");
+                    return;
+                    break;
+                } else {
+                    string ruang, jenis;
+                    cout << "| >>> Masukkan jenis ps baru : Ps "; cin >> jenis;
+                    top->daftarPs.jenisPs = "Ps " + jenis;
+                    cout << "| >>> Masukkan ruangan baru  : Area "; cin >> ruang;
+                    top->daftarPs.room = "Area " + ruang;
+                    cout << "| >>> Masukkan harga/jam baru: ";
+                    cin >> top->daftarPs.harga;
+                    
+                    cout << "| <<< Data Ps berhasil diubah!                                  |" << endl;
+                    cout << "+===============================================================+\n" << endl;
+                    system("PAUSE");
+                    return;
+                    break;
+                }
+            }
+            top = top->next;
+        } if (psId == 0) {
+            cout << "| <<< Id Ps tidak ditemukan!                                    |" << endl;
+            cout << "+===============================================================+\n" << endl;
+            system("PAUSE");
+            return;
+        }
+    }
+}
+
+void dataPs_rem(Node **top) {
+    if(*top == NULL) {
+        cout << "| <<< Data Ps kosong!!                                          |" << endl;
+        cout << "+===============================================================+\n" << endl;
+        system("PAUSE");
+        return;
+    } else {
+        if((*top)->daftarPs.status != "Tersedia") {
+            cout << "| <<< Tidak dapat menghapus data, Ps sedang digunakan!          |" << endl;
+            cout << "+===============================================================+\n" << endl;
+            system("PAUSE");
+            return;
+        } else {
+            Node *temp = *top;
+            *top = (*top)->next;
+            idPees--;
+            delete temp;
+            cout << "| <<< Data Ps berhasil dihapus!                                 |" << endl;
+            cout << "+===============================================================+\n" << endl;
+            system("PAUSE");
+            return;
+        }
+    }
+}
+
+
+void menu_admin3(Node *front, Node *top) {
+    Ps dataPs[100];
+    int i = 0;
+    while(top != NULL) {
+        dataPs[i].jenisPs = top->daftarPs.jenisPs;
+        dataPs[i].room = top->daftarPs.room;
+        dataPs[i].lama = top->daftarPs.lama;
+        dataPs[i].idUsr = top->daftarPs.idUsr;
+        dataPs[i].idPs = top->daftarPs.idPs;
+        i++;
+        top = top->next;
+    }
+    system("CLS");
+    cout << " _______________________________________________________________________ " << endl;
+    cout << "| ID | NAMA PENGGUNA    | TOTAL BERMAIN | JENIS PS | RUANG  | DURASI    |" << endl;
+    cout << "+----+------------------+---------------+----------+--------+-----------+" << endl;
+    
+    string data = "kosong";
+    while(front != NULL) {
+        for(int j = 0; j < i; j++) {
+            if(front->customer.id == dataPs[j].idUsr) {
+                cout << "| " << front->customer.id << "  | " << tab(front->customer.nama, 8) << "| " << front->customer.total << " Jam \t|   ";
+                cout << dataPs[j].jenisPs << "   | " << dataPs[j].room << " | " << dataPs[j].lama << " Jam\t|";
+                cout << endl;
+                data = "!kosong";
+            }
+        }
+        front = front->next;
+    }
+
+    if(data == "kosong") {
+        cout << "|                                                                       |" << endl;
+        cout << "|                Data kosong, atau belum ada perental!                  |" << endl;
+        cout << "|                                                                       |" << endl;
+    }
+    char menuAdmin3;
+    cout << "+=======================================================================+" << endl;
+    cout << "| [1] Hapus Data Main " << endl;
+    cout << "| [2] Riwayat Pembayaran " << endl;
+    cout << "| [0] Kembali " << endl;
+    cout << "| >>> Masukkan pilihan menu : "; cin >> menuAdmin3;
+    if (menuAdmin3 == '0') {
+        cout << "+=======================================================================+" << endl;
+        menu_admin();
+    } else if(menuAdmin3 == '1') {
+        if(data == "!kosong") {
+            remRental_user(TOP);
+        } else {
+            cout << "| <<< Tidak dapat menghapus, data perental kosong!                      |" << endl;
+            cout << "+=======================================================================+\n" << endl;
+            system("PAUSE");
+            menu_admin3(FRONT, TOP);
+        }
+    } else if(menuAdmin3 == '2') {
+        dataBayar_user(HEAD, FRONT);
+    }
+}
+
+void dataBayar_user(Node *head, Node *front) {
+    Node *hapusData = head;
+    User dataUser[100];
+    
+    int i = 0;
+    int j = -1;
+    while(front != NULL) {
+        dataUser[i].id = front->customer.id;
+        dataUser[i].nama = front->customer.nama;
+        i++;
+        front = front->next;
+    }
+    system("CLS");
+    cout << " __________________________________________________________________________________ " << endl;
+    cout << "| ID | NAMA PENGGUNA    |    TAGIHAN    |    DITERIMA   |    KEMBALI    |  STATUS  |" << endl;
+    cout << "+----+------------------+---------------+---------------+---------------+----------+" << endl;
+
+    while(head != NULL) {
+        string kembali = (head->dataBayar.kembali == 0) ? " ----- " : "Rp."+to_string(head->dataBayar.kembali);
+        for(j = 0 ; j < i; j++) {
+            if(head->dataBayar.idUser == dataUser[j].id && dataUser[j].nama != "") {
+                cout << "| ";
+                cout << dataUser[j].id << "  | " << tab(dataUser[j].nama, 8) << "| Rp.";
+                cout << head->dataBayar.tagihan << " \t| Rp." << head->dataBayar.diterima << " \t| ";
+                cout << kembali << " \t|  " << head->dataBayar.status << "   |" << endl;
+                j = 0;
+                break;
+            }
+        }
+        head = head->next;
+    }
+
+    if(j == -1) {
+        cout << "|                                                                                  |" << endl;
+        cout << "|                    Data kosong, belum ada riwayat pembayaran!                    |" << endl;
+        cout << "|                                                                                  |" << endl;
+        cout << "+==================================================================================+\n" << endl;
+        system("PAUSE");
+        menu_admin3(FRONT, TOP);
+    } else {
+        char menuHistory;
+        cout << "+==================================================================================+" << endl;
+        cout << "| [1] Hapus Riwayat Pembayaran                                                     |" << endl;
+        cout << "| [0] Kembali                                                                      |" << endl;
+        cout << "| >>> Masukkan menu anda : "; cin >> menuHistory;
+        if(menuHistory == '1') {
+            HEAD = NULL;
+            cout << "| <<< Berhasil Menghapus Riwayat Pembayaran!                                       |" << endl;
+            cout << "+==================================================================================+\n" << endl;
+            system("PAUSE");
+        }
+        menu_admin3(FRONT, TOP);
+    }
+}
+
+void remRental_user(Node *top) {
+    Ps dataPs[100];
+    Node *dataBaru = top;
+    
+    int i = 0;
+    while(top != NULL) {
+        dataPs[i].idUsr = top->daftarPs.idUsr;
+        dataPs[i].lama = top->daftarPs.lama;
+        dataPs[i].status = top->daftarPs.status;
+        i++;
+        top = top->next;
+    }
+    int userId;
+    cout << "| >>> Masukkan id pemain    : "; cin >> userId;
+    for(int j = 0; j < i; j++) {
+        if(dataPs[j].idUsr == userId) {
+            dataPs[j].idUsr = 0;
+            dataPs[j].lama = 0;
+            dataPs[j].status = "Tersedia";
+        }
+    }
+    int k = 0;
+    while(dataBaru != NULL) {
+        dataBaru->daftarPs.idUsr = dataPs[k].idUsr;
+        dataBaru->daftarPs.lama = dataPs[k].lama;
+        dataBaru->daftarPs.status = dataPs[k].status;
+        k++;
+        dataBaru = dataBaru->next;
+    }
+    cout << "| <<< Data pemain berhasil dihapus!                                  |" << endl;
+    cout << "+====================================================================+\n" << endl;
+    system("PAUSE");
+    menu_admin3(FRONT, TOP);
+}
+
+
+
+//MENU USER
+void user() {
+    string uname, pwd, input;
+    system("CLS");
+    cout << " _________________________________________________________ " << endl;
+    cout << "|                     MASUK SEBAGAI USER                  |" << endl;
+    cout << "+=========================================================+" << endl;
+    cout << "| [1] Login Akun                                          |" << endl;
+    cout << "| [2] Buat Akun                                           |" << endl;
+    cout << "| [0] Kembali                                             |" << endl;
+    cout << "| >>> Pilih menu anda      : "; cin >> input;
+
+    if(input == "1") {
+        user_loginAkun(FRONT);
+        user();
+    }
+    else if (input == "2"){
+        user_buatAkun(&FRONT, &REAR);
+        user();
+    }
+    else if (input == "0"){
+        cout << "+=========================================================+" << endl;
+        return;
+    }
+    else {
+        cout << "| <<< Input anda tidak valid!                             |" << endl;
+        cout << "+=========================================================+\n" << endl;
+        system("PAUSE");
+        user();
+    }
+}
+
+// USER BUAT AKUN
+void user_buatAkun(Node **front, Node **rear) {
+    Node *nodeBaru = new Node();
+    string user, pass, cekPass, name, address;
+    int age; string umur;
+    int value = 1;
+    
+    idUser++;
+    nodeBaru->customer.id = idUser;
+    cout << "| >>> Masukkan nama anda   : "; fflush(stdin); getline(cin,name);
+    if((name).size() > 15 || name == "") {
+        cout << "| <<< Nama tidak dapat kosong/lebih dari 15 karakter!     |" << endl;
+        goto gagal;
+    } else {
+        nodeBaru->customer.nama = name;
+        cout << "| >>> Masukkan umur anda   : "; cin >> umur;
+        stringstream cekInt(umur);
+        cekInt >> age;
+    }
+    if(age > 99 || age == 0) {
+        cout << "| <<< Umur tidak dapat kosong/lebih dari 2 digit!         |" << endl;
+        goto gagal;
+    } else {
+        nodeBaru->customer.umur = age;
+    }
+    cout << "| >>> Masukkan alamat anda : "; fflush(stdin); getline(cin,address);
+    if((address).size() > 12 || address == "") {
+        cout << "| <<< Alamat tidak dapat kosong/lebih dari 12 karakter!   |" << endl;
+        goto gagal;
+    } else {
+        nodeBaru->customer.alamat = address;
+    }
+    cout << "| >>> Masukkan username    : "; fflush(stdin); getline(cin,user);
+    if((user).size() > 14 || user == "") {
+        cout << "| <<< Username tidak dapat kosong/lebih dari 14 karakter! |" << endl;
+        goto gagal;
+    } else {
+        nodeBaru->customer.username = user;
+    }
+    cout << "| >>> Masukkan password    : "; fflush(stdin); getline(cin, pass);
+    if(pass == "") {
+        cout << "| <<< Password tidak dapat kosong!                        |" << endl;
+        goto gagal;
+    } else {
+        cout << "| >>> Konfirmasi password  : "; fflush(stdin); getline(cin, cekPass);
+        if(pass != cekPass) {
+            cout << "| <<< Anda memasukkan password yang beda!                 |" << endl;
+            value = 0;
+        } else {
+            nodeBaru->customer.password = pass;
+        }
+    }
+
+    if(value == 0) {
+    gagal:
+        idUser--;
+        cout << "+=========================================================+\n" << endl;
+        system("PAUSE");
+        return;
+    } else {
+        if(*front == NULL) {
+            *front = nodeBaru;
+        } else {
+            (*rear)->next = nodeBaru;
+        }
+        *rear = nodeBaru;
+
+        cout << "| <<< Akun user berhasil dibuat!                          |" << endl;
+        cout << "+=========================================================+\n" << endl;
+        system("PAUSE");
+        return;
+    }
+}
+
+// USER LOGIN
+string username, password;
+void user_loginAkun(Node *front) {
+    char ch;
+    cout << "| >>> Masukkan username    : "; fflush(stdin); getline(cin, username);
+    cout << "| >>> Masukkan password    : "; fflush(stdin); getline(cin, password);
+
+    int status = 1;
+    while(front != NULL) {
+        if(username == front->customer.username){
+            status = 0;
+            if(password == front->customer.password){
+                cout << "| <<< Akun terverifikasi!                                 |" << endl;
+                cout << "+=========================================================+\n" << endl;
+                system("PAUSE");
+                menu_user();
+                break;
+            } else {
+                cout << "| <<< Username/Password anda salah!                       |" << endl;
+                cout << "+=========================================================+\n" << endl;
+                system("PAUSE");
+                break;
+            }
+            break;
+        }
+        front = front->next;
+    }
+    if(status > 0) {
+        cout << "| <<< Akun tidak ditemukan!                               |" << endl;
+        cout << "+=========================================================+\n" << endl;
+        system("PAUSE");
+    }
+    username = "";
+    password = "";
+    return;
+}
+
+
+void menu_user() {
+    char menuUser;
+    system("CLS");
+    cout << " _______________________________________________ " << endl;
+    cout << "|                   MENU USER                   |" << endl;
+    cout << "+===============================================+" << endl;
+    cout << "| [1] Rental Ps                                 |" << endl;
+    cout << "| [2] Daftar Ps                                 |" << endl;
+    cout << "| [3] Daftar Bermain User                       |" << endl;
+    cout << "| [0] Kembali                                   |" << endl;
+    cout << "| [x] Exit                                      |" << endl;
+    cout << "| >>> Pilih menu anda    : "; cin >> menuUser;
+
+    if(menuUser == '1') {
+        user_menu1(FRONT, TOP, &HEAD);
+    } else if(menuUser == '2') {
+        user_menu2(TOP);
+    } else if(menuUser == '3') {
+        user_menu3(FRONT, TOP);
+    } else if(menuUser == '0') {
+        username = "";
+        password = "";
+        cout << "+===============================================+\n" << endl;
+        return;
+    } else if(menuUser == 'x') {
+        cout << "| <<< Terimakasih telah menggunakan program.    |" << endl;
+        cout << "+===============================================+" << endl;
+        exit(0);
+    } else {
+        cout << "| <<< Input yang anda masukkan tidak valid!     |" << endl;
+        cout << "+===============================================+" << endl;
+        menu_user();
+    }
+}
+
+void user_menu1(Node *front, Node *top, Node **head) {
+    Node *newData = new Node();
+    Ps dataPs[100];
+    string jenis;
+    int lama;
+    cout << "| >>> Masukkan jenis ps  : Ps "; cin >> jenis; jenis = "Ps "+jenis;
+    string stat = "!tersedia";
+    while(top != NULL) {
+        if(top->daftarPs.status == "Tersedia" && top->daftarPs.jenisPs == jenis) {
+            stat = "Tersedia";
+            break;
+        }
+        top = top->next;
+    }
+    
+    while(front != NULL) {
+        if(front->customer.username == username && front->customer.password == password) {
+            break;
+        }
+        front = front->next;
+    }
+
+    if (stat != "Tersedia") {
+        cout << "| <<< Jenis "+ jenis +" tidak tersedia / sedang full!  |" << endl;
+        cout << "+===============================================+\n" << endl;
+        system("PAUSE");
+    } else {
+        cout << "| >>> Waktu lama bermain : "; cin >> lama;
+        if(lama == 0) {
+            cout << "| <<< Lama bermain tidak dapat bernilai kosong! |" << endl;
+            cout << "+===============================================+\n" << endl;
+            system("PAUSE");
+        } else {
+            int diterima;
+            int tagihan = lama * top->daftarPs.harga;
+            cout << "| <<< Tagihan anda       : Rp." << tagihan << endl;
+            cout << "| >>> Masukkan uang anda : Rp."; cin >> diterima;
+
+                newData->dataBayar.diterima = diterima;
+                newData->dataBayar.tagihan = tagihan;
+                newData->dataBayar.idUser = front->customer.id;
+                newData->dataBayar.idPsUser = top->daftarPs.idPs;
+
+            if(diterima < tagihan) {
+                newData->dataBayar.status = "Gagal";
+                cout << "| >>> Gagal merental uang anda tidak mencukupi! |" << endl;
+                cout << "+===============================================+\n" << endl;
+                system("PAUSE");
+            } else {
+                newData->dataBayar.kembali = diterima - tagihan;
+                newData->dataBayar.status = "Lunas";
+
+                top->daftarPs.status = "Disewa";
+                top->daftarPs.lama = lama;
+                top->daftarPs.idUsr = front->customer.id;
+                front->customer.total += lama;
+                front->customer.userPsId = top->daftarPs.idPs;
+                cout << "| <<< Berhasil merental!                        |" << endl;
+                cout << "+===============================================+\n" << endl;
+
+                
+            // Membuat file .txt sebagai struk pengguna
+            string file = "D:\\Struk Rental Ps Id-"+to_string(front->customer.id)+".txt";
+            string baris;
+            ofstream output(file, fstream::app);
+            ofstream outfile;
+            outfile.open(file.c_str());
+            
+            while(true){
+                outfile << " +-----------------------------+" << endl;
+                outfile << " |        PIXEL Rental PS      |" << endl;
+                outfile << " |           SAMARINDA         |" << endl;
+                outfile << " +-----------------------------+" << endl;
+                outfile << " |  id pengguna : " << front->customer.id << "            |" << endl;
+                outfile << " |    atas nama : " << front->customer.nama << endl;
+                outfile << " |     jenis ps : " << jenis+"         |" << endl;
+                outfile << " |       durasi : " << top->daftarPs.lama << " jam        |" << endl;
+                outfile << " |        ruang : " << top->daftarPs.room << "       |" << endl;
+                outfile << " +-----------------------------+" << endl;
+                outfile << " | Tagihan anda : Rp." << newData->dataBayar.tagihan << endl;
+                outfile << " |    Uang anda : Rp." << newData->dataBayar.diterima << endl;
+                outfile << " |      Kembali : Rp." << newData->dataBayar.kembali << endl;
+                outfile << " +-----------------------------+" << endl;
+                outfile << " ===============================" << endl;
+                outfile << "           TERIMA KASIH         " << endl;
+                outfile << " ===============================" << endl;
+                outfile << baris << endl;
+                break;
+            }
+            outfile.close();
+            ifstream infile;
+            
+            // Menampilkan isi struk / isi dari file .txt
+            infile.open(file.c_str());
+            while (getline (infile,baris)) {
+                cout << baris << '\n';
+            } infile.close();
+
+            cout << "Struk berhasil disimpan, di lokasi disk D:" << endl;
+            system("PAUSE");
+        }}}
+    
+    newData->next = NULL;
+    if (*head == NULL) {
+        *head = newData;
+    } else {
+        Node *temp = *head;
+        while (temp->next != NULL) {
+            temp = temp->next;
+        }
+        temp->next = newData;
+    }
+
+    menu_user();
+}
+
+void user_menu2(Node *top) {
+    if(top == NULL) {
+        cout << "\n+=============================================================+" << endl;
+        cout << "|                                                               |" << endl;
+        cout << "|        Data Ps kosong, atau data ps telah dihapus semua.      |" << endl;
+        cout << "|                                                               |" << endl;
+        cout << "+===============================================================+\n" << endl;
+        system("PAUSE");
+        menu_user();
+    } else {
+        system("CLS");
+        cout << " _______________________________________________________________ " << endl;
+        cout << "|  ID   | JENIS PS |   RUANG    |   HARGA/JAM   |    STATUS     |" << endl;
+        cout << "+-------+----------+------------+---------------+---------------+" << endl;
+        while (top != NULL) {
+            cout << "|  " << top->daftarPs.idPs << " \t|   " << top->daftarPs.jenisPs << "   | " << top->daftarPs.room;
+            cout << " \t| Rp." << top->daftarPs.harga << " \t| " << top->daftarPs.status << " \t|" << endl;
+            top = top->next;
+        }
+        cout << "+===============================================================+" << endl;
+        
+        char menuUser;
+        cout << "| [1] Sort                                                      |" << endl;
+        cout << "| [2] Search                                                    |" << endl;
+        cout << "| [0] Kembali                                                   |" << endl;
+        cout << "| >>> Masukkan menu anda : "; cin >> menuUser;
+        if(menuUser == '0') {
+            cout << "+===============================================================+" << endl;
+            menu_user();
+        } else if(menuUser == '1') {
+            char menuSort;
+            string order;
+            cout << "| [1] Id Ps                                                     |" << endl;
+            cout << "| [2] Jenis Ps                                                  |" << endl;
+            cout << "| [3] Ruang                                                     |" << endl;
+            cout << "| [4] Harga                                                     |" << endl;
+            cout << "| [0] Kembali                                                   |" << endl;
+            cout << "| >>> Pilih menu yang ingin disort: "; cin >> menuSort;
+            if(menuSort != '0') {
+                cout << "| [1] Ascending                                                 |" << endl;
+                cout << "| [2] Descending                                                |" << endl;
+                cout << "| >>> Urut berdasarkan: "; cin >> order;
+                order = menu_sort(TOP, order, menuSort);
+                cout << "| <<< Berhasil disorting secara " + order + "!\t                |" << endl;
+                cout << "+===============================================================+\n" << endl;
+                system("PAUSE");
+            }
+            user_menu2(TOP);
+
+        } else if(menuUser == '2') {
+            char menuSearch;
+            cout << "| [1] Id Ps" << endl;
+            cout << "| [2] Jenis Ps" << endl;
+            cout << "| [3] Ruang" << endl;
+            cout << "| [4] Harga" << endl;
+            cout << "| [0] Kembali" << endl;
+            cout << "| >>> Pilih menu yang ingin disearch             : "; cin >> menuSearch;
+            if(menuSearch != '0') {
+                menu_search(TOP, menuSearch);
+            } else {
+                user_menu2(TOP);
+            }
+        } else {
+            cout << "| <<< Input yang anda masukkan tidak valid!                     |" << endl;
+            cout << "+===============================================================+\n" << endl;
+            system("PAUSE");
+            user_menu2(TOP);
+        }
+    }
+}
+
+void user_menu3(Node *front, Node *top) {
+    Ps dataPs[100];
+    int i = 0;
+    while(top != NULL) {
+        dataPs[i].jenisPs = top->daftarPs.jenisPs;
+        dataPs[i].room = top->daftarPs.room;
+        dataPs[i].lama = top->daftarPs.lama;
+        dataPs[i].idUsr = top->daftarPs.idUsr;
+        dataPs[i].idPs = top->daftarPs.idPs;
+        i++;
+        top = top->next;
+    }
+    system("CLS");
+    cout << " _______________________________________________________________________ " << endl;
+    cout << "| ID | NAMA PENGGUNA    | TOTAL BERMAIN | JENIS PS | RUANG  | DURASI    |" << endl;
+    cout << "+----+------------------+---------------+----------+--------+-----------+" << endl;
+    
+    string data = "kosong";
+    while(front != NULL) {
+        for(int j = 0; j < i; j++) {
+            if(front->customer.id == dataPs[j].idUsr) {
+                cout << "| " << front->customer.id << "  | " << tab(front->customer.nama, 8) << "| " << front->customer.total << " Jam \t|   ";
+                cout << dataPs[j].jenisPs << "   | " << dataPs[j].room << " | " << dataPs[j].lama << " Jam\t|";
+                cout << endl;
+                data = "!kosong";
+            }
+        }
+        front = front->next;
+    }
+
+    if(data == "kosong") {
+        cout << "|                                                                       |" << endl;
+        cout << "|               Data kosong, atau belum ada perental!                   |" << endl;
+        cout << "|                                                                       |" << endl;
+    }
+    cout << "+=======================================================================+\n" << endl;
+    system("PAUSE");
+    menu_user();
+}
+
+
+string menu_sort(Node *top, string order, char menuSort) {
+    Ps dataPs[100];
+    Node *dataBaru = top;
+
+	int i = 0;
+	while(top != NULL) {
+	    dataPs[i].idPs = top->daftarPs.idPs;
+	    dataPs[i].jenisPs = top->daftarPs.jenisPs;
+	    dataPs[i].harga = top->daftarPs.harga;
+	    dataPs[i].room = top->daftarPs.room;
+        dataPs[i].status = top->daftarPs.status;
+	    top = top->next;
+	    i++;
+	}
+    
+	order = (order=="1") ? "Ascending" : "Descending";
+	int n = idPees;
+	for (int j = 0; j < n; j++) {
+		switch (menuSort) {
+			case '1':
+				dataPs[j].var2 = dataPs[j].idPs;
+				break;
+			case '2':
+				dataPs[j].var1 = dataPs[j].jenisPs;
+				break;
+			case '3':
+				dataPs[j].var1 = dataPs[j].room;
+				break;
+			case '4':
+				dataPs[j].var2 = dataPs[j].harga;
+				break;
+			default:
+                return order;
+                break;
+        }
+	}
+    shell_sort(dataPs, n, order, menuSort);
+
+    int k = 0;
+    while(dataBaru != NULL) {
+        dataBaru->daftarPs.idPs = dataPs[k].idPs;
+        dataBaru->daftarPs.jenisPs = dataPs[k].jenisPs;
+        dataBaru->daftarPs.harga = dataPs[k].harga;
+        dataBaru->daftarPs.room = dataPs[k].room;
+        dataBaru->daftarPs.status = dataPs[k].status;
+        dataBaru = dataBaru->next;
+        k++;
+    }
+
+	return order;
+}
+
+void menu_search(Node *top, char menuSearch) {
+	int x, n = idPees + 1;
+	string y, nomor, jenis;
+    Ps dataPs[100];
+    
+	int i = 0;
+	while(top != NULL) {
+	    dataPs[i].idPs = top->daftarPs.idPs;
+	    dataPs[i].jenisPs = top->daftarPs.jenisPs;
+	    dataPs[i].harga = top->daftarPs.harga;
+	    dataPs[i].room = top->daftarPs.room;
+        dataPs[i].status = top->daftarPs.status;
+	    top = top->next;
+	    i++;
+	}
+    
+    switch (menuSearch) {
+        case '1':
+            cout << "| >>> Masukkan id ps yang ingin anda cari        : ";
+            cin >> x;
+            for (int h = 0; h < n; h++) {
+                dataPs[h].var2 = dataPs[h].idPs;
+            }
+            break;
+        case '2':
+            cout << "| >>> Masukkan jenis ps yang ingin anda cari     : Ps ";
+            cin >> jenis; y = "Ps "+jenis;
+            for (int h = 0; h < n; h++) {
+                dataPs[h].var1 = dataPs[h].jenisPs;
+            }
+            break;
+        case '3':
+            cout << "| >>> Masukkan ruang yang ingin anda cari        : Area ";
+            cin >> nomor; y = "Area "+nomor;
+            for (int h = 0; h < n; h++) {
+                dataPs[h].var1 = dataPs[h].room;
+            }
+            break;
+        case '4':
+            cout << "| >>> Masukkan jumlah harga yang ingin anda cari : Rp.";
+            cin >> x;
+            for (int h = 0; h < n; h++) {
+                dataPs[h].var2 = dataPs[h].harga;
+            }
+            break;
+        default:
+            return;
+            break;
+    }
+    shell_sort(dataPs, n, "Ascending", menuSearch);
+    
+	int j = -1;
+		system("cls");
+        cout << " _______________________________________________________________ " << endl;
+        cout << "|  ID   | JENIS PS |   RUANG    |   HARGA/JAM   |    STATUS     |" << endl;
+        cout << "+-------+----------+------------+---------------+---------------+" << endl;
+	if (menuSearch == '2' || menuSearch == '3') {
+		for (int i = 0; i < n; i++) {
+            int index = jumpSearch(dataPs, x, y, n, menuSearch);
+			if (index != -1) {
+                cout << "|  " << dataPs[index].idPs << " \t|   " << dataPs[index].jenisPs << "   | " << dataPs[index].room;
+                cout << " \t| Rp." << dataPs[index].harga << " \t| " << dataPs[index].status << " \t|" << endl;
+                dataPs[index].var1 = "";
+				j++;
+			}
+		}
+	} else if (menuSearch == '1' || menuSearch == '4') {
+		for (int i = 0; i < n; i++) {
+            int index = jumpSearch(dataPs, x, y, n, menuSearch);
+			if (index != -1) {
+                cout << "|  " << dataPs[index].idPs << " \t|   " << dataPs[index].jenisPs << "   | " << dataPs[index].room;
+                cout << " \t| Rp." << dataPs[index].harga << " \t| " << dataPs[index].status << " \t|" << endl;
+				dataPs[index].var2 = -1;
+				j++;
+			}
+		}
+	}
+	if (j == -1) {
+        cout << "|                                                               |" << endl;
+		cout << "|               Data Yang Anda Cari Tidak Tersedia              |" << endl;
+        cout << "|                                                               |" << endl;
+        cout << "+===============================================================+\n" << endl;
+        system("PAUSE");
+        user_menu2(TOP);
+	} else {
+        char menu;
+        cout << "+===============================================================+" << endl;
+		cout << "| <<< Data ditemukan!                                           |" << endl;
+        cout << "| [1] Rental Langsung                                           |" << endl;
+        cout << "| [0] Kembali                                                   |" << endl;
+        cout << "| >>> Pilih menu : "; cin >> menu;
+        if(menu == '1') {
+            user_menu1(FRONT, TOP, &HEAD);
+        } else {
+            user_menu2(TOP);
+        }
+	}
+}
+
+int shell_sort(Ps *dataPs, int &n, string order, char menuSort) {
+	if (menuSort == '1' || menuSort == '4') {
+		for (int gap = n/2; gap > 0; gap /= 2) {
+			if (order == "Ascending") {
+				for (int i = gap; i < n; i += 1) {
+					Ps temp = dataPs[i];
+					int j;
+					for (j = i; j >= gap && dataPs[j - gap].var2 > temp.var2; j -= gap) {
+						dataPs[j] = dataPs[j - gap];
+					}
+				dataPs[j] = temp;
+				}
+			}
+			else if (order == "Descending") {
+				for (int i = gap; i < n; i += 1) {
+					Ps temp = dataPs[i];
+					int j;
+					for (j = i; j >= gap && dataPs[j - gap].var2 < temp.var2; j -= gap) {
+						dataPs[j] = dataPs[j - gap];
+					}
+				dataPs[j] = temp;
+				}
+			}	
+		}
+	} else if (menuSort == '2' || menuSort == '3') {
+		for (int gap = n/2; gap > 0; gap /= 2) {
+			if (order == "Ascending") {
+				for (int i = gap; i < n; i += 1) {
+					Ps temp = dataPs[i];
+					int j;
+					for (j = i; j >= gap && dataPs[j - gap].var1 > temp.var1; j -= gap) {
+						dataPs[j] = dataPs[j - gap];
+					}
+				dataPs[j] = temp;
+				}
+			}
+			else if (order == "Descending") {
+				for (int i = gap; i < n; i += 1) {
+					Ps temp = dataPs[i];
+					int j;
+					for (j = i; j >= gap && dataPs[j - gap].var1 < temp.var1; j -= gap) {
+						dataPs[j] = dataPs[j - gap];
+					}
+				dataPs[j] = temp;
+				}
+			}	
+		}
+	}
+	return 0;
+}
+
+int jumpSearch(Ps *arr, int x, string y, int n, char menuSearch) {
+	if (menuSearch == '2' || menuSearch == '3') {
+		int step = sqrt(n);
+		int prev = 0;
+		while (arr[min(step, n)-1].var1 < y) {
+			prev = step;
+			step += sqrt(n);
+			if (prev >= n) {
+				return -1;
+			}
+		}
+		while (arr[prev].var1 < y) {
+			prev++;
+			if (prev == min(step, n)) {
+				return -1;
+			}
+		}
+		if (arr[prev].var1 == y) {
+			return prev;
+		}
+	}
+    else if (menuSearch == '1' || menuSearch == '4') {
+		int step = sqrt(n);
+		int prev = 0;
+		while (arr[min(step, n)-1].var2 < x) {
+			prev = step;
+			step += sqrt(n);
+			if (prev >= n) {
+				return -1;
+			}
+		}
+		while (arr[prev].var2 < x) {
+			prev++;
+			if (prev == min(step, n)) {
+				return -1;
+			}
+		}
+		if (arr[prev].var2 == x) {
+			return prev;
+		}
+	}
+	return -1;
+}
